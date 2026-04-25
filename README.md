@@ -96,6 +96,8 @@ WardrobeOS exposes a private-beta GPT Actions surface at `/api/gpt/openapi.json`
 
 See `prd/docs/CUSTOM_GPT_COMPANION.md` for OAuth setup, required environment variables, and suggested GPT instructions.
 
+For a short end-to-end architecture walkthrough, see `prd/docs/APP_ARCHITECTURE_MAGAZINE.md`.
+
 ## iPhone PWA Login
 
 Use an email-code-only Magic Link template for the installed PWA. Avoid including `{{ .ConfirmationURL }}` because email clients can pre-open the link and consume the token before the user enters the code.
