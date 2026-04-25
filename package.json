@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "export:architecture-pdf": "node scripts/export-architecture-pdf.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "auth:otp": "node scripts/supabase-auth-admin.mjs otp",

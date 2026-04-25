@@ -98,6 +98,14 @@ See `prd/docs/CUSTOM_GPT_COMPANION.md` for OAuth setup, required environment var
 
 For a short end-to-end architecture walkthrough, see `prd/docs/APP_ARCHITECTURE_MAGAZINE.md`.
 
+The designed magazine page is available locally at `/architecture-magazine`. Regenerate the polished PDF with:
+
+```bash
+npm run export:architecture-pdf
+```
+
+The exported PDF is served from `public/docs/wardrobeos-architecture-magazine.pdf`.
+
 ## iPhone PWA Login
 
 Use an email-code-only Magic Link template for the installed PWA. Avoid including `{{ .ConfirmationURL }}` because email clients can pre-open the link and consume the token before the user enters the code.
