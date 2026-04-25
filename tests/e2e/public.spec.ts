@@ -31,6 +31,18 @@ test("login exposes an in-app email code fallback for PWA users", async ({ page 
   await expect(page.getByRole("button", { name: /verify code in this app/i })).toBeEnabled();
 });
 
+test("Custom GPT OpenAPI schema is publicly available", async ({ request }) => {
+  const response = await request.get("/api/gpt/openapi.json");
+  expect(response.ok()).toBeTruthy();
+  const schema = await response.json();
+
+  expect(schema.openapi).toBe("3.1.0");
+  expect(schema.paths["/api/gpt/closet"].get.operationId).toBe("listClosetItems");
+  expect(schema.components.securitySchemes.OAuth2.flows.authorizationCode.authorizationUrl).toContain(
+    "/api/gpt/oauth/authorize"
+  );
+});
+
 test("expired auth links are explained on the login screen", async ({ page }) => {
   await page.goto("/?error_description=Token%20has%20expired%20or%20is%20invalid");
   await expect(page).toHaveURL(/\/login\?auth_error=/);

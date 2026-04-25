@@ -24,9 +24,12 @@ export default function LoginPage() {
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
+  const [nextPath, setNextPath] = useState("/app/dashboard");
 
   useEffect(() => {
-    setAuthError(new URLSearchParams(window.location.search).get("auth_error") || "");
+    const params = new URLSearchParams(window.location.search);
+    setAuthError(params.get("auth_error") || "");
+    setNextPath(safeNextPath(params.get("next")));
   }, []);
 
   async function sendCode(event: FormEvent<HTMLFormElement>) {
@@ -44,7 +47,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
-        emailRedirectTo: `${getAuthRedirectOrigin()}/auth/callback?next=/app/dashboard`
+        emailRedirectTo: `${getAuthRedirectOrigin()}/auth/callback?next=${encodeURIComponent(nextPath)}`
       }
     });
 
@@ -78,7 +81,7 @@ export default function LoginPage() {
     for (const type of otpTypes) {
       const { error } = await supabase.auth.verifyOtp({ email: normalizedEmail, token: normalizedToken, type });
       if (!error) {
-        window.location.assign("/app/dashboard");
+        window.location.assign(nextPath);
         return;
       }
       lastError = error.message;
@@ -107,7 +110,7 @@ export default function LoginPage() {
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
     if (!error) {
-      window.location.assign("/app/dashboard");
+      window.location.assign(nextPath);
       return;
     }
 
@@ -247,4 +250,9 @@ function getAuthRedirectOrigin() {
 
 function isValidOtpLength(value: string) {
   return value.length >= MIN_OTP_LENGTH && value.length <= MAX_OTP_LENGTH;
+}
+
+function safeNextPath(value: string | null) {
+  if (!value?.startsWith("/") || value.startsWith("//")) return "/app/dashboard";
+  return value;
 }

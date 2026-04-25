@@ -14,17 +14,17 @@ export async function GET(request: Request) {
   const next = safeNextPath(requestUrl.searchParams.get("next"));
 
   if (authError) {
-    return redirectToLogin(requestUrl, authError);
+    return redirectToLogin(requestUrl, authError, next);
   }
 
   if (code) {
     const supabase = await createSupabaseSsrClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) return redirectToLogin(requestUrl, error.message);
+    if (error) return redirectToLogin(requestUrl, error.message, next);
   } else if (tokenHash && type) {
     const supabase = await createSupabaseSsrClient();
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
-    if (error) return redirectToLogin(requestUrl, error.message);
+    if (error) return redirectToLogin(requestUrl, error.message, next);
   }
 
   return NextResponse.redirect(new URL(next, requestUrl.origin));
@@ -35,11 +35,12 @@ function safeNextPath(next: string | null) {
   return next;
 }
 
-function redirectToLogin(requestUrl: URL, message: string) {
+function redirectToLogin(requestUrl: URL, message: string, next = "/app/dashboard") {
   const loginUrl = new URL("/login", requestUrl.origin);
   loginUrl.searchParams.set(
     "auth_error",
     `${message} Request a fresh email code and enter it in the app instead of clicking the email link.`
   );
+  loginUrl.searchParams.set("next", next);
   return NextResponse.redirect(loginUrl);
 }

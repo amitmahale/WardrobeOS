@@ -37,10 +37,13 @@ Copy `.env.example` to `.env.local` when connecting production services.
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-OPENAI_API_KEY=
 AI_TAGGING_PROVIDER=gemini
+GEMINI_MODEL=gemini-3.1-flash-lite-preview
 GEMINI_API_KEY=
 NEXT_PUBLIC_ENABLE_AI_TAGGING=false
+GPT_ACTION_CLIENT_ID=wardrobeos-custom-gpt
+GPT_ACTION_CLIENT_SECRET=
+GPT_ACTION_TOKEN_SECRET=
 ```
 
 ## Supabase
@@ -49,6 +52,7 @@ Apply the initial schema from:
 
 ```text
 supabase/migrations/0001_initial_schema.sql
+supabase/migrations/0002_gpt_actions_oauth.sql
 ```
 
 Use the Supabase SQL editor for this initial setup. See `supabase/README.md`.
@@ -85,6 +89,12 @@ NEXT_PUBLIC_ENABLE_AI_TAGGING=true
 The add-item screen exposes “Suggest tags with AI” after an image is uploaded. If no Gemini key is configured, the app falls back to manual tagging and local dominant-color detection.
 
 Bulk upload uses the same feature flag through `/api/ai/tag-items/bulk`. The review UI is available at `/app/items/bulk` and still works without AI by pre-filling drafts from filenames and local color estimation.
+
+## Custom GPT Companion
+
+WardrobeOS exposes a private-beta GPT Actions surface at `/api/gpt/openapi.json`. It lets a Custom GPT read a signed-in user's closet, create outfit suggestions, and produce visualization briefs while ChatGPT handles conversation and image generation with the user's own ChatGPT plan.
+
+See `prd/docs/CUSTOM_GPT_COMPANION.md` for OAuth setup, required environment variables, and suggested GPT instructions.
 
 ## iPhone PWA Login
 

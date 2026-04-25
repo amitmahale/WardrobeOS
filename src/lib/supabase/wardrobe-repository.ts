@@ -13,14 +13,16 @@ import type {
 type TypedSupabaseClient = SupabaseClient<Database, "public", any>;
 
 export async function ensureDefaultCloset(supabase: TypedSupabaseClient, userId: string, email?: string | null) {
-  await supabase.from("profiles").upsert(
-    {
+  const existingProfile = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
+  if (existingProfile.error) throw existingProfile.error;
+  if (!existingProfile.data) {
+    const insertedProfile = await supabase.from("profiles").insert({
       id: userId,
       display_name: email?.split("@")[0] || "Wardrobe user",
       updated_at: new Date().toISOString()
-    },
-    { onConflict: "id" }
-  );
+    });
+    if (insertedProfile.error) throw insertedProfile.error;
+  }
 
   const existing = await supabase
     .from("closets")
