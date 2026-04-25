@@ -6,6 +6,7 @@
 .env.production.local
 .vercel-token
 .admin-auth-*
+.gpt-action-oauth*
 .vercel
 .next
 node_modules
