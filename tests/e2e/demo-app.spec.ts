@@ -1,9 +1,27 @@
 import { Buffer } from "node:buffer";
 import { expect, type Page, test } from "@playwright/test";
 
+const samplePng = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
+  "base64"
+);
+
 async function gotoApp(page: Page, path: string) {
   await page.goto(path);
   await expect(page.getByTestId("app-shell")).toHaveAttribute("data-hydrated", "true");
+}
+
+async function mockServerBackedBootstrap(page: Page) {
+  await page.route("**/api/bootstrap", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        user: { id: "test-user", email: "test@example.com" },
+        closet: { id: "test-closet", name: "Test Closet" },
+        items: []
+      })
+    });
+  });
 }
 
 test.beforeEach(async ({ page }) => {
@@ -54,6 +72,8 @@ test("can add a manual item and see it in the closet", async ({ page }) => {
   await expect(page.locator("#name")).toHaveValue("Test Linen Shirt");
   await page.locator("#subcategory").fill("linen shirt");
   await expect(page.locator("#subcategory")).toHaveValue("linen shirt");
+  await page.locator("#color").selectOption("pink");
+  await expect(page.locator("#color")).toHaveValue("pink");
   await page.getByRole("button", { name: /^Save item$/i }).click();
   await expect(page.getByRole("heading", { name: "Test Linen Shirt" })).toBeVisible();
 
@@ -68,10 +88,7 @@ test("bulk upload creates reviewable drafts and saves accepted items", async ({ 
     {
       name: "cream-shirt.png",
       mimeType: "image/png",
-      buffer: Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
-        "base64"
-      )
+      buffer: samplePng
     }
   ]);
 
@@ -86,6 +103,77 @@ test("bulk upload creates reviewable drafts and saves accepted items", async ({ 
 
   await gotoApp(page, "/app/closet");
   await expect(page.getByText("Bulk Linen Shirt")).toBeVisible();
+});
+
+test("single item upload starts AI tagging automatically", async ({ page }) => {
+  await mockServerBackedBootstrap(page);
+  let tagRequests = 0;
+  await page.route("**/api/ai/tag-item", async (route) => {
+    tagRequests += 1;
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        suggestions: {
+          name: "Auto Pink Polo",
+          category: "top",
+          subcategory: "polo shirt",
+          primaryColor: "pink",
+          pattern: "solid",
+          material: "cotton",
+          warmth: 2,
+          formality: 2,
+          seasons: ["spring", "summer"],
+          occasions: ["casual"]
+        }
+      })
+    });
+  });
+
+  await gotoApp(page, "/app/items/new");
+  await expect(page.getByRole("button", { name: /retry ai tagging/i })).toBeVisible();
+  await page.locator("#item-image").setInputFiles([{ name: "pink-polo.png", mimeType: "image/png", buffer: samplePng }]);
+
+  await expect.poll(() => tagRequests).toBe(1);
+  await expect(page.getByText("AI tags applied automatically. Review before saving.")).toBeVisible();
+  await expect(page.locator("#name")).toHaveValue("Auto Pink Polo");
+  await expect(page.locator("#color")).toHaveValue("pink");
+});
+
+test("bulk upload starts AI tagging automatically", async ({ page }) => {
+  await mockServerBackedBootstrap(page);
+  let tagRequests = 0;
+  await page.route("**/api/ai/tag-items/bulk", async (route) => {
+    tagRequests += 1;
+    const payload = route.request().postDataJSON() as { images?: Array<{ id: string }> };
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        results: (payload.images || []).map((image) => ({
+          id: image.id,
+          suggestions: {
+            name: "Auto Bulk Pink Polo",
+            category: "top",
+            subcategory: "polo shirt",
+            primaryColor: "pink",
+            pattern: "solid",
+            material: "cotton",
+            warmth: 2,
+            formality: 2,
+            seasons: ["spring", "summer"],
+            occasions: ["casual"]
+          }
+        }))
+      })
+    });
+  });
+
+  await gotoApp(page, "/app/items/bulk");
+  await page.locator("#bulk-images").setInputFiles([{ name: "auto-pink-polo.png", mimeType: "image/png", buffer: samplePng }]);
+
+  await expect.poll(() => tagRequests).toBe(1);
+  await expect(page.getByText("AI tags applied automatically. Review before saving.").first()).toBeVisible();
+  await expect(page.getByLabel("Item name for auto-pink-polo.png")).toHaveValue("Auto Bulk Pink Polo");
+  await expect(page.locator('select[id$="-color"]').first()).toHaveValue("pink");
 });
 
 test("closet filters, season, sort, and list view are interactive", async ({ page }) => {

@@ -1,21 +1,7 @@
 import { z } from "zod";
+import { COLOR_FAMILIES } from "@/lib/types";
 
-const colorSchema = z.enum([
-  "navy",
-  "white",
-  "cream",
-  "charcoal",
-  "olive",
-  "tan",
-  "khaki",
-  "black",
-  "blue",
-  "burgundy",
-  "brown",
-  "gray",
-  "camel",
-  "green"
-]);
+const colorSchema = z.enum(COLOR_FAMILIES);
 const categorySchema = z.enum(["top", "bottom", "layer", "outerwear", "shoes"]);
 const seasonSchema = z.enum(["all", "spring", "summer", "fall", "winter"]);
 const occasionSchema = z.enum(["casual", "smart-casual", "work", "dinner", "travel", "formal"]);

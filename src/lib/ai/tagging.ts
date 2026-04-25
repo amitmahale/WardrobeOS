@@ -1,4 +1,4 @@
-import type { ColorFamily, ItemCategory, Occasion, Season } from "@/lib/types";
+import { COLOR_FAMILIES, type ColorFamily, type ItemCategory, type Occasion, type Season } from "@/lib/types";
 
 export type TagSuggestion = {
   name?: string;
@@ -18,7 +18,7 @@ const prompt = `Analyze this clothing image for a wardrobe catalog.
 Return only compact JSON with these optional fields:
 name, category, subcategory, primaryColor, pattern, material, warmth, formality, seasons, occasions, fitNotes.
 Allowed categories: top, bottom, layer, outerwear, shoes.
-Allowed colors: navy, white, cream, charcoal, olive, tan, khaki, black, blue, burgundy, brown, gray, camel, green.
+Allowed colors: ${COLOR_FAMILIES.join(", ")}.
 Allowed seasons: spring, summer, fall, winter.
 Allowed occasions: casual, smart-casual, work, dinner, travel, formal.
 warmth and formality must be integers from 1 to 5.
@@ -28,7 +28,7 @@ const bulkPrompt = `Analyze these clothing images for a wardrobe catalog.
 Return only compact JSON in this exact shape:
 {"items":[{"id":"the provided image id","suggestions":{"name":"...","category":"top","subcategory":"...","primaryColor":"navy","pattern":"solid","material":"cotton","warmth":2,"formality":3,"seasons":["spring"],"occasions":["casual"],"fitNotes":"..."}}]}
 Allowed categories: top, bottom, layer, outerwear, shoes.
-Allowed colors: navy, white, cream, charcoal, olive, tan, khaki, black, blue, burgundy, brown, gray, camel, green.
+Allowed colors: ${COLOR_FAMILIES.join(", ")}.
 Allowed seasons: spring, summer, fall, winter.
 Allowed occasions: casual, smart-casual, work, dinner, travel, formal.
 warmth and formality must be integers from 1 to 5.
@@ -179,22 +179,7 @@ function normalizeSuggestions(raw: Record<string, unknown>): TagSuggestion {
     name: stringValue(raw.name),
     category: oneOf(raw.category, ["top", "bottom", "layer", "outerwear", "shoes"]),
     subcategory: stringValue(raw.subcategory),
-    primaryColor: oneOf(raw.primaryColor, [
-      "navy",
-      "white",
-      "cream",
-      "charcoal",
-      "olive",
-      "tan",
-      "khaki",
-      "black",
-      "blue",
-      "burgundy",
-      "brown",
-      "gray",
-      "camel",
-      "green"
-    ]),
+    primaryColor: oneOf(raw.primaryColor, COLOR_FAMILIES),
     pattern: stringValue(raw.pattern),
     material: stringValue(raw.material),
     warmth: numberRange(raw.warmth, 1, 5),

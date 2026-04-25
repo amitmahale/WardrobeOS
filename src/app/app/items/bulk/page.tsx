@@ -91,6 +91,7 @@ export default function BulkUploadPage() {
 
     setIsProcessing(true);
     const jobs = files.map((file) => ({ id: createId("bulk"), file }));
+    const readyEntries: BulkEntry[] = [];
     setEntries((current) => [...jobs.map(({ id, file }) => processingEntry(id, file.name)), ...current].slice(0, maxFiles));
 
     for (const { id, file } of jobs) {
@@ -107,10 +108,14 @@ export default function BulkUploadPage() {
         const imageData = await resizeImageToDataUrl(file, 900, 0.72);
         const primaryColor = await estimateDominantColorFamily(imageData);
         const guessedName = guessName(file.name);
-        updateEntry(id, {
+        const readyEntry: BulkEntry = {
+          id,
+          fileName: file.name,
           selected: true,
           status: "needs-review",
-          message: "Ready for review. Apply AI tags or save after checking fields.",
+          message: canUseAi
+            ? "Ready for AI tagging. Auto-tagging will start when this batch finishes processing."
+            : "Ready for review. Apply AI tags or save after checking fields.",
           draft: {
             ...emptyDraft(),
             name: guessedName,
@@ -119,12 +124,22 @@ export default function BulkUploadPage() {
             imageData,
             imageName: file.name
           }
+        };
+        readyEntries.push(readyEntry);
+        updateEntry(id, {
+          selected: readyEntry.selected,
+          status: readyEntry.status,
+          message: readyEntry.message,
+          draft: readyEntry.draft
         });
       } catch (error) {
         updateEntry(id, errorPatch(error instanceof Error ? error.message : "Image processing failed."));
       }
     }
     setIsProcessing(false);
+    if (canUseAi && readyEntries.length) {
+      await tagEntries(readyEntries, true);
+    }
   }
 
   async function tagSelected() {
@@ -138,8 +153,12 @@ export default function BulkUploadPage() {
     );
     if (!targets.length) return;
 
+    await tagEntries(targets, false);
+  }
+
+  async function tagEntries(targets: BulkEntry[], automatic: boolean) {
     setIsTagging(true);
-    setMessage(null);
+    setMessage(automatic ? "AI tagging started automatically for the new upload batch." : null);
     setEntries((current) =>
       current.map((entry) => (targets.some((target) => target.id === entry.id) ? { ...entry, status: "tagging" } : entry))
     );
@@ -167,11 +186,12 @@ export default function BulkUploadPage() {
           return {
             ...entry,
             status: "needs-review",
-            message: "AI tags applied. Review before saving.",
+            message: automatic ? "AI tags applied automatically. Review before saving." : "AI tags applied. Review before saving.",
             draft: mergeSuggestions(entry.draft, suggestion)
           };
         })
       );
+      if (automatic) setMessage("AI tags applied automatically. Review before saving.");
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Bulk tagging failed.";
       setMessage(errorMessage);
@@ -292,6 +312,7 @@ export default function BulkUploadPage() {
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
               Bulk upload keeps the human-in-the-loop rule: the system can suggest tags, but nothing enters the closet
               until you review and save the drafts. The queue resumes on this device if you leave and come back.
+              When AI is available, tagging starts automatically after upload processing finishes.
             </p>
           </div>
           <div className="grid gap-3 sm:min-w-72">
@@ -309,9 +330,9 @@ export default function BulkUploadPage() {
             <div className="flex flex-wrap gap-2">
               <Button onClick={tagSelected} disabled={!selectedCount || isTagging || isProcessing || !canUseAi}>
                 <Sparkles className="mr-2 size-4" />
-                {isTagging ? "Tagging..." : "Tag selected"}
+                {isTagging ? "Tagging..." : "Retry AI tags"}
               </Button>
-              <Button variant="secondary" onClick={saveReviewed} disabled={!selectedCount || isSaving || isProcessing}>
+              <Button variant="secondary" onClick={saveReviewed} disabled={!selectedCount || isSaving || isProcessing || isTagging}>
                 <CheckCircle2 className="mr-2 size-4" />
                 {isSaving ? "Saving..." : "Save reviewed items"}
               </Button>

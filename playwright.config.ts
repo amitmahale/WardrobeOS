@@ -12,7 +12,7 @@ export default defineConfig({
     trace: "on-first-retry"
   },
   webServer: {
-    command: "E2E_AUTH_BYPASS=1 npm run dev",
+    command: "NEXT_PUBLIC_ENABLE_AI_TAGGING=true E2E_AUTH_BYPASS=1 npm run dev",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: false,
     timeout: 120_000

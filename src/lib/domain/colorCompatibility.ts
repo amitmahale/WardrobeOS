@@ -159,6 +159,6 @@ export const COLOR_COMPATIBILITY: Partial<Record<ColorFamily, Partial<Record<Col
 };
 
 export function colorCompatibility(a: ColorFamily, b: ColorFamily) {
-  if (a === b) return ["navy", "charcoal", "gray", "white", "cream"].includes(a) ? 8 : 6;
+  if (a === b) return ["navy", "charcoal", "gray", "white", "cream", "ivory", "beige", "stone", "black"].includes(a) ? 8 : 6;
   return COLOR_COMPATIBILITY[a]?.[b] ?? COLOR_COMPATIBILITY[b]?.[a] ?? 5;
 }

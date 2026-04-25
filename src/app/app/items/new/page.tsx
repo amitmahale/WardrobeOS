@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Camera, Sparkles } from "lucide-react";
@@ -24,6 +24,9 @@ export default function NewItemPage() {
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [isTagging, setIsTagging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const taggingRunRef = useRef(0);
+  const aiEnabled = process.env.NEXT_PUBLIC_ENABLE_AI_TAGGING === "true";
+  const canUseAi = serverBacked && aiEnabled;
 
   async function handleFile(file?: File) {
     setError(null);
@@ -40,6 +43,11 @@ export default function NewItemPage() {
     const dataUrl = await resizeImageToDataUrl(file);
     const color = await estimateDominantColorFamily(dataUrl);
     setDraft((current) => ({ ...current, imageData: dataUrl, imageName: file.name, primaryColor: color }));
+    if (canUseAi) {
+      void suggestTagsForImage(dataUrl, true);
+    } else {
+      setAiMessage(aiEnabled ? "Sign in to apply AI tags automatically after upload." : null);
+    }
   }
 
   function update<K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) {
@@ -110,18 +118,25 @@ export default function NewItemPage() {
       setAiMessage("Upload an image first.");
       return;
     }
+    await suggestTagsForImage(draft.imageData, false);
+  }
+
+  async function suggestTagsForImage(imageData: string, automatic: boolean) {
+    const runId = taggingRunRef.current + 1;
+    taggingRunRef.current = runId;
     setIsTagging(true);
-    setAiMessage(null);
+    setAiMessage(automatic ? "AI tagging started automatically. Review before saving." : null);
     try {
       const response = await fetch("/api/ai/tag-item", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageData: draft.imageData })
+        body: JSON.stringify({ imageData })
       });
       const payload = (await response.json()) as {
         suggestions?: Partial<typeof draft>;
         error?: { message?: string };
       };
+      if (runId !== taggingRunRef.current) return;
       if (!response.ok) {
         setAiMessage(payload.error?.message || "AI tagging is not available yet.");
         return;
@@ -130,11 +145,12 @@ export default function NewItemPage() {
         ...current,
         ...Object.fromEntries(Object.entries(payload.suggestions || {}).filter(([, value]) => value !== undefined))
       }));
-      setAiMessage("AI suggestions applied. Review before saving.");
+      setAiMessage(automatic ? "AI tags applied automatically. Review before saving." : "AI suggestions applied. Review before saving.");
     } catch (err) {
+      if (runId !== taggingRunRef.current) return;
       setAiMessage(err instanceof Error ? err.message : "AI tagging failed.");
     } finally {
-      setIsTagging(false);
+      if (runId === taggingRunRef.current) setIsTagging(false);
     }
   }
 
@@ -178,16 +194,18 @@ export default function NewItemPage() {
               <Input id="item-image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => handleFile(e.target.files?.[0])} />
             </Field>
           </div>
-          <Button variant="secondary" onClick={suggestTags} disabled={!draft.imageData || isTagging}>
-            <Sparkles className="mr-2 size-4" />
-            {isTagging ? "Tagging..." : "Suggest tags with AI"}
-          </Button>
+          {canUseAi ? (
+            <Button variant="secondary" onClick={suggestTags} disabled={!draft.imageData || isTagging}>
+              <Sparkles className="mr-2 size-4" />
+              {isTagging ? "Tagging..." : "Retry AI tagging"}
+            </Button>
+          ) : null}
           {draft.imageName ? <Badge>{draft.imageName}</Badge> : null}
           {error ? <p className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
           {aiMessage ? <p className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-sm text-muted-foreground">{aiMessage}</p> : null}
           <p className="text-sm leading-6 text-muted-foreground">
-            Tip: camera capture works best in the installed PWA. Use the library picker for screenshots, saved retail photos, or
-            batch prep.
+            Tip: camera capture works best in the installed PWA. AI tagging starts automatically after upload when enabled.
+            Use the library picker for screenshots, saved retail photos, or batch prep.
           </p>
         </div>
       </Card>

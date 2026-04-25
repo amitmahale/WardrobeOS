@@ -1,31 +1,54 @@
 import type {
   BudgetTier,
-  ColorFamily,
   ItemCategory,
   ItemStatus,
   Occasion,
   PurchaseCandidate,
   Season
 } from "@/lib/types";
+import { COLOR_FAMILIES, type ColorFamily } from "@/lib/types";
 
 export const COLOR_HEX: Record<ColorFamily, string> = {
   navy: "#243B63",
   white: "#ECEFF5",
   cream: "#E9DDC8",
+  ivory: "#F4EAD5",
+  beige: "#D7C2A0",
+  stone: "#B8B1A4",
+  taupe: "#8A786A",
   charcoal: "#3B4454",
   olive: "#596B3C",
   tan: "#B68C57",
   khaki: "#BAA175",
   black: "#16181C",
   blue: "#4F76B8",
+  "light-blue": "#9AB9DD",
+  denim: "#3F628A",
+  teal: "#2F7D7E",
+  turquoise: "#41A7A7",
+  mint: "#A7D8C3",
   burgundy: "#7E2E43",
+  maroon: "#5E2431",
   brown: "#6B4B34",
   gray: "#9BA4B4",
   camel: "#C8A16B",
-  green: "#4B7A63"
+  green: "#4B7A63",
+  pink: "#E58AA7",
+  rose: "#C96B83",
+  red: "#B43A3A",
+  coral: "#E87961",
+  orange: "#D7772D",
+  rust: "#A8552A",
+  yellow: "#E2C84B",
+  mustard: "#C49A2C",
+  purple: "#6E4A8E",
+  lavender: "#B6A0D8",
+  silver: "#C8CDD3",
+  gold: "#C9A44C",
+  multi: "#8D6EBD"
 };
 
-export const COLOR_NAMES = Object.keys(COLOR_HEX) as ColorFamily[];
+export const COLOR_NAMES = [...COLOR_FAMILIES];
 
 export const OCCASIONS: Occasion[] = ["casual", "smart-casual", "work", "dinner", "travel", "formal"];
 export const SEASONS: Season[] = ["spring", "summer", "fall", "winter"];

@@ -10,21 +10,47 @@ export type FeedbackValue = "thumbs_up" | "thumbs_down" | "saved" | "wore" | "di
 export type ClosetSort = "recent" | "wear-count" | "name" | "formality";
 export type ClosetView = "grid" | "list";
 
-export type ColorFamily =
-  | "navy"
-  | "white"
-  | "cream"
-  | "charcoal"
-  | "olive"
-  | "tan"
-  | "khaki"
-  | "black"
-  | "blue"
-  | "burgundy"
-  | "brown"
-  | "gray"
-  | "camel"
-  | "green";
+export const COLOR_FAMILIES = [
+  "navy",
+  "white",
+  "cream",
+  "ivory",
+  "beige",
+  "stone",
+  "taupe",
+  "charcoal",
+  "olive",
+  "tan",
+  "khaki",
+  "black",
+  "blue",
+  "light-blue",
+  "denim",
+  "teal",
+  "turquoise",
+  "mint",
+  "burgundy",
+  "maroon",
+  "brown",
+  "gray",
+  "camel",
+  "green",
+  "pink",
+  "rose",
+  "red",
+  "coral",
+  "orange",
+  "rust",
+  "yellow",
+  "mustard",
+  "purple",
+  "lavender",
+  "silver",
+  "gold",
+  "multi"
+] as const;
+
+export type ColorFamily = (typeof COLOR_FAMILIES)[number];
 
 export type WardrobeItem = {
   id: string;
