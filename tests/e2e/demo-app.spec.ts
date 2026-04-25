@@ -57,12 +57,22 @@ test("buy-next renders purchase candidates", async ({ page }) => {
   await gotoApp(page, "/app/buy-next");
   await expect(page.getByRole("heading", { name: "Buy Next" })).toBeVisible();
   await expect(page.getByText(/unlocks/i).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Detected closet gaps" })).toBeVisible();
+  await expect(page.getByTestId("purchase-card-image").first()).toBeVisible();
 });
 
 test("pack planner renders recommended capsule", async ({ page }) => {
   await gotoApp(page, "/app/pack");
   await expect(page.getByRole("heading", { name: "Pack Planner" })).toBeVisible();
   await expect(page.getByText(/recommended capsule/i)).toBeVisible();
+});
+
+test("GPT stylist launchpad provides visual try-on prompts", async ({ page }) => {
+  await gotoApp(page, "/app/gpt-stylist");
+  await expect(page.getByRole("heading", { name: "GPT Stylist" })).toBeVisible();
+  await expect(page.getByTestId("gpt-launchpad")).toBeVisible();
+  await expect(page.getByText(/visualize those selected closet items on me/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: /open chatgpt stylist/i })).toBeVisible();
 });
 
 test("can add a manual item and see it in the closet", async ({ page }) => {

@@ -186,10 +186,26 @@ export async function authenticateGptRequest(request: Request): Promise<GptAuthC
   if (!match) throw new GptAuthError("Missing bearer token.");
 
   const payload = verifyAccessToken(match[1], request);
+  await markGptTokenUsed(payload.sub);
   return {
     userId: payload.sub,
     scopes: payload.scope.split(/\s+/).filter(Boolean)
   };
+}
+
+async function markGptTokenUsed(userId: string) {
+  try {
+    const db = createSupabaseServiceRoleClient() as any;
+    const now = new Date().toISOString();
+    await db
+      .from("gpt_oauth_refresh_tokens")
+      .update({ last_used_at: now })
+      .eq("user_id", userId)
+      .is("revoked_at", null)
+      .gt("expires_at", now);
+  } catch {
+    // Usage telemetry should never block the GPT action response.
+  }
 }
 
 export function readClientCredentials(request: Request, body: URLSearchParams) {

@@ -141,8 +141,13 @@ export type PurchaseRecommendation = PurchaseCandidate & {
   coverageDelta: Partial<Record<Occasion, number>>;
   confidence: Confidence;
   reason: string;
+  gapLabel: string;
+  gapReason: string;
+  gapSeverity: Confidence;
+  candidateImageData: string;
   impactedItemIds: string[];
   impactedItems: string[];
+  impactedItemPreviews: Array<Pick<WardrobeItem, "id" | "name" | "category" | "primaryColor" | "imageData">>;
   riskFlags: string[];
   score: number;
 };

@@ -1,11 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import { PurchaseCard } from "@/components/recommendations/purchase-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Label, Select } from "@/components/ui/field";
 import { CATEGORY_OPTIONS, OCCASIONS, SEASONS } from "@/lib/constants";
+import { getClosetGaps } from "@/lib/domain/closetGaps";
+import { createPlaceholderImage } from "@/lib/domain/placeholderImage";
 import { getPurchaseSuggestions } from "@/lib/domain/purchaseSimulator";
 import { useWardrobeStore } from "@/lib/store/wardrobe-store";
 import type { BudgetTier, BuyNextQuery, ItemCategory, Occasion, Season } from "@/lib/types";
@@ -18,6 +21,7 @@ export default function BuyNextPage() {
   const recordFeedback = useWardrobeStore((state) => state.recordFeedback);
   const serverBacked = useWardrobeStore((state) => state.serverBacked);
   const recommendations = getPurchaseSuggestions(items, query).slice(0, 8);
+  const gaps = getClosetGaps(items).slice(0, 4);
   const top = recommendations[0];
 
   function patch(patchValue: Partial<BuyNextQuery>) {
@@ -107,9 +111,60 @@ export default function BuyNextPage() {
             <p className="relative mt-4 text-sm text-muted-foreground">No candidate clears the current filters.</p>
           )}
         </Card>
+
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>Detected closet gaps</CardTitle>
+              <CardDescription>Recommendations now start from what your catalog is missing, not just generic staples.</CardDescription>
+            </div>
+          </CardHeader>
+          <div className="grid gap-3">
+            {gaps.length ? (
+              gaps.map((gap) => (
+                <div key={gap.key} className="grid grid-cols-[72px_1fr] gap-3 rounded-3xl border border-white/10 bg-white/[0.03] p-3">
+                  <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#11192a]">
+                    <Image
+                      src={createPlaceholderImage(gap.visual)}
+                      alt={gap.label}
+                      fill
+                      sizes="72px"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <strong className="text-sm">{gap.label}</strong>
+                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-muted-foreground">
+                        {labelize(gap.severity)}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">{gap.reason}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-sm text-muted-foreground">
+                No obvious catalog gaps. Buy Next will focus on high-scoring outfit multipliers.
+              </p>
+            )}
+          </div>
+        </Card>
       </section>
 
       <section className="grid gap-4">
+        <Card className="relative overflow-hidden">
+          <div className="absolute -right-16 -top-16 size-40 rounded-full bg-signal-blue/10 blur-3xl" />
+          <CardHeader className="relative">
+            <div>
+              <CardTitle>Gap-based recommendations</CardTitle>
+              <CardDescription>
+                Each card shows the candidate image, the gap it fills, and the owned pieces it can unlock.
+              </CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
         {recommendations.length ? (
           recommendations.map((recommendation) => (
             <PurchaseCard

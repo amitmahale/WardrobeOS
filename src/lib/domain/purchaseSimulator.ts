@@ -1,4 +1,5 @@
 import { PURCHASE_CANDIDATES } from "@/lib/constants";
+import { summarizeCandidateGap } from "@/lib/domain/closetGaps";
 import { getOutfitSuggestions, outfitKey } from "@/lib/domain/outfitGenerator";
 import { createPlaceholderImage } from "@/lib/domain/placeholderImage";
 import type {
@@ -27,7 +28,7 @@ export function getPurchaseSuggestions(items: WardrobeItem[], query: BuyNextQuer
   return PURCHASE_CANDIDATES.filter(
     (candidate) => query.preferredCategory === "all" || candidate.category === query.preferredCategory
   )
-    .filter((candidate) => query.season === "all" || candidate.seasons.includes(query.season as Season))
+    .filter((candidate) => query.season === "all" || candidate.seasons.includes(query.season as Season) || candidate.seasons.includes("all"))
     .filter((candidate) => budgetAllows(query.budgetTier, candidate.priceBand))
     .map((candidate) => simulateCandidate(items, candidate, query, baseKeys, temperatureBand))
     .filter((recommendation) => recommendation.unlockCount > 0 || !query.avoidDuplicates)
@@ -50,6 +51,7 @@ function simulateCandidate(
   );
 
   if (query.avoidDuplicates && duplicateItems.length >= 1) {
+    const candidateImageData = createPlaceholderImage(candidate);
     return {
       ...candidate,
       unlockCount: 0,
@@ -57,8 +59,13 @@ function simulateCandidate(
       coverageDelta: { [targetOccasion]: 0 },
       confidence: "low",
       reason: "Too close to an item already in the closet.",
+      gapLabel: "Duplicate guard",
+      gapReason: `${duplicateItems.length} similar ${candidate.primaryColor} ${candidate.category} piece${duplicateItems.length === 1 ? "" : "s"} already exist.`,
+      gapSeverity: "low",
+      candidateImageData,
       impactedItemIds: [],
       impactedItems: [],
+      impactedItemPreviews: [],
       riskFlags: ["Duplicate risk"]
     };
   }
@@ -106,11 +113,13 @@ function simulateCandidate(
     ).values()
   ].slice(0, 5);
   const riskFlags = duplicateItems.length ? ["Similar item already owned"] : [];
-  const score = highConfidence.length * 10 + impacted.length * 2 - duplicateItems.length * 12;
+  const gap = summarizeCandidateGap(items, candidate, targetOccasion);
+  const gapBoost = gap.severity === "high" ? 18 : gap.severity === "medium" ? 9 : 0;
+  const score = highConfidence.length * 10 + impacted.length * 2 + gapBoost - duplicateItems.length * 12;
   const confidence = highConfidence.length >= 8 ? "high" : highConfidence.length >= 4 ? "medium" : "low";
   const reason = highConfidence.length
-    ? `${candidate.name} links ${impacted.length || 1} existing pieces and improves ${targetOccasion} coverage without forcing a full wardrobe reset.`
-    : `${candidate.name} adds limited incremental value for the current closet shape.`;
+    ? `${candidate.name} links ${impacted.length || 1} existing pieces and improves ${targetOccasion} coverage. ${gap.reason}`
+    : `${candidate.name} is mostly a gap-fill candidate right now. ${gap.reason}`;
 
   return {
     ...candidate,
@@ -119,8 +128,19 @@ function simulateCandidate(
     coverageDelta: { [targetOccasion]: highConfidence.length },
     confidence,
     reason,
+    gapLabel: gap.label,
+    gapReason: gap.reason,
+    gapSeverity: gap.severity,
+    candidateImageData: virtualItem.imageData || createPlaceholderImage(candidate),
     impactedItemIds: impacted.map((item) => item.id),
     impactedItems: impacted.map((item) => item.name),
+    impactedItemPreviews: impacted.map((item) => ({
+      id: item.id,
+      name: item.name,
+      category: item.category,
+      primaryColor: item.primaryColor,
+      imageData: item.imageData
+    })),
     riskFlags
   };
 }
