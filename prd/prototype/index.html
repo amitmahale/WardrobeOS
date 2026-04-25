@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wardrobe OS — Functional Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">WO</div>
+        <div>
+          <h1>Wardrobe OS</h1>
+          <p>Closet optimizer prototype</p>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-link active" data-view="overview">Overview</button>
+        <button class="nav-link" data-view="dashboard">Dashboard</button>
+        <button class="nav-link" data-view="closet">Closet</button>
+        <button class="nav-link" data-view="add-item">Add Item</button>
+        <button class="nav-link" data-view="outfits">Outfit Lab</button>
+        <button class="nav-link" data-view="buy-next">Buy Next</button>
+        <button class="nav-link" data-view="pack">Pack Planner</button>
+        <button class="nav-link" data-view="insights">Insights</button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="mini-stat">
+          <span>Prototype</span>
+          <strong>Local-only</strong>
+        </div>
+        <button id="reset-demo" class="ghost-btn">Reset demo data</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Invite-only MVP direction</p>
+          <h2 id="topbar-title">Overview</h2>
+        </div>
+        <div class="topbar-actions">
+          <button id="seed-sample" class="secondary-btn">Seed sample closet</button>
+          <button id="jump-add" class="primary-btn">Add an item</button>
+        </div>
+      </header>
+
+      <main id="view-root"></main>
+    </div>
+  </div>
+
+  <div id="item-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="true"></div>
+    <div class="modal-panel">
+      <button class="modal-close" data-close-modal="true">×</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <template id="empty-state-template">
+    <div class="empty-state">
+      <div class="empty-state-icon">◎</div>
+      <h3>Nothing here yet</h3>
+      <p>Add a few items and the system will start producing outfit and purchase guidance.</p>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

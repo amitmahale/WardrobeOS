@@ -1,0 +1,48 @@
+Build Wardrobe OS as a production-ready MVP web app.
+
+Read the following files first and use them as the source of truth:
+1. docs/PRD.md
+2. docs/CODEX_HANDOFF.md
+3. docs/ARCHITECTURE.md
+4. docs/API_SPEC.md
+5. docs/DB_SCHEMA.sql
+6. docs/DESIGN_SYSTEM.md
+7. docs/USER_FLOWS.md
+8. docs/QA_ACCEPTANCE.md
+
+Constraints:
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Supabase Auth + Postgres + Storage
+- deterministic recommendation engine in pure domain modules
+- optional AI tagging behind a feature flag
+- clean, premium, desktop-first UI
+- seeded demo data for local development
+
+Build in this order:
+1. app shell and auth
+2. schema and data access
+3. closet CRUD
+4. image upload and processing states
+5. outfit lab
+6. buy-next engine
+7. insights
+8. pack planner
+9. tests and polish
+
+Important:
+- do not invent new product scope unless necessary
+- do not hide key filters
+- do not rely on AI for ranking logic
+- do not save AI tags without user confirmation
+- optimize for practical usefulness, not fashion-blog copy
+
+Deliver:
+- complete codebase
+- setup instructions
+- env var template
+- SQL migrations
+- seeded demo closet
+- tests
