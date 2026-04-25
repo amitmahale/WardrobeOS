@@ -211,6 +211,14 @@ export default function ArchitectureMagazinePage() {
             <code key={action}>{action}</code>
           ))}
         </div>
+        <div className={styles.visualNote}>
+          <strong>How the visual try-on moment works</strong>
+          <p>
+            In ChatGPT, the user can upload a full-length photo and ask the WardrobeOS Stylist to visualize real closet
+            items on them in different combinations. The GPT reads the closet through Actions, selects or compares outfits,
+            then uses ChatGPT image generation to create styling previews.
+          </p>
+        </div>
         <div className={styles.callout}>
           ChatGPT receives a WardrobeOS-scoped bearer token, not Supabase credentials. Refresh tokens are hashed in
           Supabase. Full-body photos are uploaded directly to ChatGPT for visualization, not stored by WardrobeOS.

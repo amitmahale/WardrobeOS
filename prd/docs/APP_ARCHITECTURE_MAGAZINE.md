@@ -163,6 +163,8 @@ GPT Action endpoints:
 - `suggestClosetOutfits`: deterministic outfit suggestions from closet tags.
 - `createVisualizationBrief`: prompt-ready visualization brief for selected item IDs.
 
+The visual try-on moment happens inside ChatGPT: the user can upload a full-length photo and ask the WardrobeOS Stylist to visualize real closet items on them in different combinations. The GPT reads the closet through Actions, selects or compares outfits, and uses ChatGPT image generation to create styling previews.
+
 Access tokens are short-lived signed bearer tokens. Refresh tokens are stored hashed in Supabase. ChatGPT never receives Supabase credentials or the WardrobeOS service role key.
 
 ## Visualization Strategy
