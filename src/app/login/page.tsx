@@ -10,6 +10,7 @@ import { Field, Input, Label } from "@/components/ui/field";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type AuthActionState = { message?: string; error?: string };
+type SendCodeResponse = { message?: string; error?: { message?: string } };
 const MIN_OTP_LENGTH = 6;
 const MAX_OTP_LENGTH = 8;
 
@@ -40,19 +41,17 @@ export default function LoginPage() {
     setPending(true);
     setState({});
     setVerifyState({});
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: normalizedEmail,
-      options: {
-        shouldCreateUser: false,
-        emailRedirectTo: `${getAuthRedirectOrigin()}/auth/callback?next=${encodeURIComponent(nextPath)}`
-      }
+    const response = await fetch("/api/auth/send-code", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: normalizedEmail, next: nextPath })
     });
+    const payload = (await response.json()) as SendCodeResponse;
 
-    if (error) {
-      setState({ error: toLoginErrorMessage(error.message) });
+    if (!response.ok) {
+      setState({ error: payload.error?.message || "Could not send email code." });
     } else {
-      setState({ message: "Email code sent. Enter the code here to sign in inside this app." });
+      setState({ message: payload.message || "Email code sent. Enter the code here to sign in inside this app." });
     }
     setPending(false);
   }
@@ -172,28 +171,8 @@ export default function LoginPage() {
   );
 }
 
-function getAuthRedirectOrigin() {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  const current = window.location.origin;
-  const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-  const fallback = isLocal ? current : configured || current;
-
-  try {
-    return new URL(fallback).origin;
-  } catch {
-    return current;
-  }
-}
-
 function isValidOtpLength(value: string) {
   return value.length >= MIN_OTP_LENGTH && value.length <= MAX_OTP_LENGTH;
-}
-
-function toLoginErrorMessage(message: string) {
-  if (/signups not allowed/i.test(message)) {
-    return "This email is not on the WardrobeOS beta access list yet. Ask the owner to add the account, then request a fresh email code.";
-  }
-  return message;
 }
 
 function safeNextPath(value: string | null) {
