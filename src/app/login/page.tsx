@@ -2,7 +2,7 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { KeyRound, LockKeyhole, Mail } from "lucide-react";
+import { KeyRound, Mail } from "lucide-react";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,11 +18,8 @@ export default function LoginPage() {
   const [pending, setPending] = useState(false);
   const [verifyState, setVerifyState] = useState<AuthActionState>({});
   const [verifying, setVerifying] = useState(false);
-  const [passwordState, setPasswordState] = useState<AuthActionState>({});
-  const [passwordPending, setPasswordPending] = useState(false);
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
-  const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [nextPath, setNextPath] = useState("/app/dashboard");
 
@@ -47,12 +44,13 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
+        shouldCreateUser: false,
         emailRedirectTo: `${getAuthRedirectOrigin()}/auth/callback?next=${encodeURIComponent(nextPath)}`
       }
     });
 
     if (error) {
-      setState({ error: error.message });
+      setState({ error: toLoginErrorMessage(error.message) });
     } else {
       setState({ message: "Email code sent. Enter the code here to sign in inside this app." });
     }
@@ -91,33 +89,6 @@ export default function LoginPage() {
       error: `${lastError} Request a fresh code and make sure the email template contains only {{ .Token }}, not {{ .ConfirmationURL }}.`
     });
     setVerifying(false);
-  }
-
-  async function signInWithPassword(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedEmail) {
-      setPasswordState({ error: "Email is required." });
-      return;
-    }
-    if (password.length < 8) {
-      setPasswordState({ error: "Password must be at least 8 characters." });
-      return;
-    }
-
-    setPasswordPending(true);
-    setPasswordState({});
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
-    if (!error) {
-      window.location.assign(nextPath);
-      return;
-    }
-
-    setPasswordState({
-      error: `${error.message} If this email only used magic-link login before, set a password once with the admin bootstrap script.`
-    });
-    setPasswordPending(false);
   }
 
   return (
@@ -196,40 +167,6 @@ export default function LoginPage() {
             the code. The safest flow is code only.
           </p>
         </form>
-
-        <div className="my-6 h-px bg-white/10" />
-
-        <form onSubmit={signInWithPassword} className="grid gap-4">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-              <LockKeyhole className="size-4 text-brand" />
-              Password fallback
-            </div>
-            <p className="text-xs leading-5 text-muted-foreground">
-              Use this after a password is created or reset by the local admin bootstrap script. It does not send email.
-            </p>
-          </div>
-          <Field>
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Your password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </Field>
-          {passwordState?.error ? (
-            <p className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-              {passwordState.error}
-            </p>
-          ) : null}
-          <Button disabled={passwordPending} variant="secondary">
-            {passwordPending ? "Signing in..." : "Sign in with password"}
-          </Button>
-        </form>
       </Card>
     </main>
   );
@@ -250,6 +187,13 @@ function getAuthRedirectOrigin() {
 
 function isValidOtpLength(value: string) {
   return value.length >= MIN_OTP_LENGTH && value.length <= MAX_OTP_LENGTH;
+}
+
+function toLoginErrorMessage(message: string) {
+  if (/signups not allowed/i.test(message)) {
+    return "This email is not on the WardrobeOS beta access list yet. Ask the owner to add the account, then request a fresh email code.";
+  }
+  return message;
 }
 
 function safeNextPath(value: string | null) {

@@ -12,8 +12,7 @@
     "export:architecture-pdf": "node scripts/export-architecture-pdf.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "auth:otp": "node scripts/supabase-auth-admin.mjs otp",
-    "auth:password": "node scripts/supabase-auth-admin.mjs password"
+    "auth:otp": "node scripts/supabase-auth-admin.mjs otp"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

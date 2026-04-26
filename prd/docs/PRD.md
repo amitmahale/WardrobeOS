@@ -238,7 +238,7 @@ Immediately generate:
 ## 15. Detailed functional requirements
 
 ### 15.1 Auth
-- email/password or magic link
+- magic-code email login
 - secure session handling
 - household membership later, single-user first
 - invite system deferred unless included as stretch

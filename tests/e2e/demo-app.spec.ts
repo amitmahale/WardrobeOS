@@ -38,7 +38,9 @@ test("login page can request a magic link", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill(`test-${Date.now()}@example.com`);
   await page.getByRole("button", { name: /send email code/i }).click();
-  await expect(page.getByText(/email code sent|for security purposes|rate limit|invalid/i)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/email code sent|for security purposes|rate limit|invalid|beta access list/i)).toBeVisible({
+    timeout: 15_000
+  });
 });
 
 test("dashboard renders from seeded closet", async ({ page }) => {

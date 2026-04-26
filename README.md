@@ -139,10 +139,4 @@ Generate a one-time login code without sending email:
 npm run auth:otp -- user@example.com
 ```
 
-Create or reset a password without sending email:
-
-```bash
-npm run auth:password -- user@example.com
-```
-
-The password command writes credentials to `.admin-auth-<email>.txt`, which is gitignored. Use the password on `/login` under "Password fallback", then delete the file after storing the password safely.
+The app no longer supports password fallback. Unknown emails are not auto-created from `/login`; add beta users in Supabase first or generate a temporary admin OTP for them.

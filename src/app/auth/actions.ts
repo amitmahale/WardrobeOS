@@ -16,11 +16,12 @@ export async function signInWithMagicLink(_: AuthActionState, formData: FormData
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
+      shouldCreateUser: false,
       emailRedirectTo: `${origin}/auth/callback?next=/app/dashboard`
     }
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: toLoginErrorMessage(error.message) };
   return { message: "Email code sent. Enter the code here to sign in inside this app." };
 }
 
@@ -60,4 +61,11 @@ function getAuthRedirectOrigin(formData: FormData) {
   } catch {
     return "http://localhost:3000";
   }
+}
+
+function toLoginErrorMessage(message: string) {
+  if (/signups not allowed/i.test(message)) {
+    return "This email is not on the WardrobeOS beta access list yet. Ask the owner to add the account, then request a fresh email code.";
+  }
+  return message;
 }

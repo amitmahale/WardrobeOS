@@ -28,7 +28,7 @@ User
 
 The web app is where users manage the wardrobe. It handles the durable, structured work:
 
-- Sign in with magic-code email or password fallback.
+- Sign in with a magic-code email flow tuned for iPhone PWA use.
 - Add one item with camera or library upload.
 - Bulk upload many photos, tag them with AI, review, correct, and save.
 - Browse, filter, update, archive, and mark items worn.
@@ -135,7 +135,7 @@ WardrobeOS is installable as an iPhone PWA. The mobile capture loop is:
 5. Optionally apply AI tags.
 6. Review and save.
 
-Auth uses an email-code-first flow because iOS email apps and browsers can consume magic links outside the installed PWA. Password fallback exists for development and rate-limit recovery.
+Auth uses an email-code-only flow because iOS email apps and browsers can consume magic links outside the installed PWA. Unknown emails are not auto-created from the login screen, which prevents Supabase's separate signup-link template from being sent during beta.
 
 ## ChatGPT Integration
 

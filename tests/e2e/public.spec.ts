@@ -23,8 +23,8 @@ test("login exposes an in-app email code fallback for PWA users", async ({ page 
   await page.goto("/login");
   await expect(page.getByLabel(/email code/i)).toBeVisible();
   await expect(page.getByRole("button", { name: /verify code in this app/i })).toBeEnabled();
-  await expect(page.getByText(/password fallback/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: /sign in with password/i })).toBeEnabled();
+  await expect(page.getByText(/password fallback/i)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /sign in with password/i })).toHaveCount(0);
 
   await page.locator("#email").fill("pwa@example.com");
   await expect(page.locator("#email")).toHaveValue("pwa@example.com");
