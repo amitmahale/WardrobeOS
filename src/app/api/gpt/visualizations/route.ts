@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { authenticateGptRequest, gptJsonError, hasScope } from "@/lib/gpt/oauth";
+import { authenticateGptRequest, gptJsonError, hasAnyScope } from "@/lib/gpt/oauth";
 import { loadGptWardrobe } from "@/lib/gpt/wardrobe";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { createSavedVisualization, listSavedVisualizations } from "@/lib/supabase/visualization-repository";
@@ -30,7 +30,7 @@ const saveVisualizationSchema = z.object({
 export async function GET(request: Request) {
   try {
     const auth = await authenticateGptRequest(request);
-    hasScope(auth, "visualizations:read");
+    hasAnyScope(auth, ["visualizations:read", "outfits:read"]);
     const context = await loadGptWardrobe(auth.userId);
     const db = createSupabaseServiceRoleClient() as any;
     const visualizations = await listSavedVisualizations(db, context.closet.id);
@@ -47,7 +47,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const auth = await authenticateGptRequest(request);
-    hasScope(auth, "visualizations:write");
+    // Existing Custom GPT OAuth grants predate visualization scopes. Accept the older styling scope for this beta.
+    hasAnyScope(auth, ["visualizations:write", "outfits:suggest"]);
     const payload = saveVisualizationSchema.parse(await request.json());
     const context = await loadGptWardrobe(auth.userId);
     const itemIds = validateItemIds(payload.itemIds, new Set(context.items.map((item) => item.id)));

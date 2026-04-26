@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, BriefcaseBusiness, Lightbulb, Shirt, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpenText, BriefcaseBusiness, Lightbulb, Shirt, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +70,9 @@ export default async function HomePage({
           <Link className="transition hover:text-foreground" href="/features">
             Features
           </Link>
+          <Link className="transition hover:text-foreground" href="/architecture-magazine">
+            Architecture
+          </Link>
           <Link className="transition hover:text-foreground" href="/privacy">
             Privacy
           </Link>
@@ -98,6 +101,12 @@ export default async function HomePage({
             </Button>
             <Button asChild variant="secondary" size="lg">
               <Link href="/features">Review features</Link>
+            </Button>
+            <Button asChild variant="ghost" size="lg">
+              <Link href="/architecture-magazine">
+                <BookOpenText className="mr-2 size-4" />
+                Architecture details
+              </Link>
             </Button>
           </div>
         </div>

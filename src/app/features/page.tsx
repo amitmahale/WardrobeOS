@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, BriefcaseBusiness, Lightbulb, Repeat2, Search, Sparkles } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpenText, BriefcaseBusiness, Lightbulb, Repeat2, Search, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,9 +20,17 @@ export default function FeaturesPage() {
         <Link href="/" className="font-semibold">
           Wardrobe OS
         </Link>
-        <Button asChild>
-          <Link href="/app/dashboard">Open demo</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="secondary">
+            <Link href="/architecture-magazine">
+              <BookOpenText className="mr-2 size-4" />
+              Architecture
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/app/dashboard">Open demo</Link>
+          </Button>
+        </div>
       </div>
       <Badge variant="brand">PRD-aligned MVP</Badge>
       <h1 className="mt-5 max-w-3xl text-5xl font-semibold tracking-[-0.04em]">Practical wardrobe intelligence, not fashion-feed noise.</h1>

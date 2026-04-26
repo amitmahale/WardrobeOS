@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { buildAccessToken, isAllowedRedirectUri, validatePkce, verifyAccessToken } from "@/lib/gpt/oauth";
+import { buildAccessToken, hasAnyScope, isAllowedRedirectUri, validatePkce, verifyAccessToken } from "@/lib/gpt/oauth";
 import { createHash } from "node:crypto";
 
 const originalEnv = { ...process.env };
@@ -43,5 +43,12 @@ describe("GPT OAuth helpers", () => {
 
     expect(validatePkce(challenge, "S256", verifier)).toBe(true);
     expect(validatePkce(challenge, "S256", "wrong")).toBe(false);
+  });
+
+  it("allows legacy GPT visualization scopes during beta", () => {
+    expect(() => hasAnyScope({ userId: "user_123", scopes: ["outfits:suggest"] }, ["visualizations:write", "outfits:suggest"])).not.toThrow();
+    expect(() => hasAnyScope({ userId: "user_123", scopes: ["closet:read"] }, ["visualizations:write", "outfits:suggest"])).toThrow(
+      /scope/i
+    );
   });
 });

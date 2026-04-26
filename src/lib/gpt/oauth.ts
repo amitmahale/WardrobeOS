@@ -98,6 +98,12 @@ export function hasScope(auth: GptAuthContext, scope: string) {
   if (!auth.scopes.includes(scope)) throw new GptForbiddenError(`Missing required scope: ${scope}`);
 }
 
+export function hasAnyScope(auth: GptAuthContext, scopes: string[], message?: string) {
+  if (!scopes.some((scope) => auth.scopes.includes(scope))) {
+    throw new GptForbiddenError(message || `Missing required scope: ${scopes.join(" or ")}`);
+  }
+}
+
 export function createAuthorizationCode() {
   return randomBytes(32).toString("base64url");
 }
