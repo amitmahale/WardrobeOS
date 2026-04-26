@@ -78,6 +78,13 @@ test("GPT stylist launchpad provides visual try-on prompts", async ({ page }) =>
   await expect(page.getByRole("button", { name: /copy & open/i }).first()).toBeVisible();
 });
 
+test("saved visualizations page renders the GPT save workflow", async ({ page }) => {
+  await gotoApp(page, "/app/visualizations");
+  await expect(page.getByRole("heading", { name: "Visualizations", exact: true })).toBeVisible();
+  await expect(page.getByText(/save this visualization to wardrobeos/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: /start in gpt stylist/i })).toBeVisible();
+});
+
 test("can add a manual item and see it in the closet", async ({ page }) => {
   await gotoApp(page, "/app/items/new");
   await expect(page.locator("#item-camera")).toHaveAttribute("capture", "environment");

@@ -38,6 +38,8 @@ test("Custom GPT OpenAPI schema is publicly available", async ({ request }) => {
 
   expect(schema.openapi).toBe("3.1.0");
   expect(schema.paths["/api/gpt/closet"].get.operationId).toBe("listClosetItems");
+  expect(schema.paths["/api/gpt/visualizations"].post.operationId).toBe("saveChatGptVisualization");
+  expect(schema.paths["/api/gpt/visualizations"].post["x-openai-isConsequential"]).toBe(true);
   expect(schema.components.securitySchemes.OAuth2.flows.authorizationCode.authorizationUrl).toContain(
     "/api/gpt/oauth/authorize"
   );

@@ -18,7 +18,13 @@ export type GptAuthContext = {
   scopes: string[];
 };
 
-export const GPT_DEFAULT_SCOPES = ["closet:read", "outfits:read", "outfits:suggest"] as const;
+export const GPT_DEFAULT_SCOPES = [
+  "closet:read",
+  "outfits:read",
+  "outfits:suggest",
+  "visualizations:read",
+  "visualizations:write"
+] as const;
 
 const ACCESS_TOKEN_TTL_SECONDS = 60 * 60;
 const CODE_TTL_SECONDS = 10 * 60;

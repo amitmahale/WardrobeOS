@@ -98,6 +98,8 @@ See `prd/docs/CUSTOM_GPT_COMPANION.md` for OAuth setup, required environment var
 
 Set `NEXT_PUBLIC_CUSTOM_GPT_URL` to the published GPT share URL, for example `https://chatgpt.com/g/g-...`, so `/app/gpt-stylist` opens the actual companion instead of the generic GPTs page. The launchpad copies the selected prompt before opening ChatGPT; ChatGPT GPT links open the GPT but do not reliably preload a new message from a third-party web app.
 
+Saved visualizations are supported through the GPT Action `POST /api/gpt/visualizations`. When ChatGPT includes generated images in `openaiFileIdRefs`, WardrobeOS downloads the temporary image immediately, stores it in Supabase Storage, and renders it in `/app/visualizations`.
+
 For a short end-to-end architecture walkthrough, see `prd/docs/APP_ARCHITECTURE_MAGAZINE.md`.
 
 The designed magazine page is available locally at `/architecture-magazine`. Regenerate the polished PDF with:

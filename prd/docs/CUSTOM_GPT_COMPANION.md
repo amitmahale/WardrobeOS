@@ -15,6 +15,8 @@ The GPT should not recreate the web app. It should call WardrobeOS Actions only 
 - `GET /api/gpt/outfits` returns saved outfits.
 - `GET /api/gpt/outfit-suggestions` generates outfit ideas from existing closet tags.
 - `POST /api/gpt/visualization-brief` creates a prompt brief for ChatGPT image generation using selected closet item IDs.
+- `GET /api/gpt/visualizations` returns ChatGPT try-on visualizations saved back to WardrobeOS.
+- `POST /api/gpt/visualizations` saves visualization metadata and any attached `openaiFileIdRefs` image into WardrobeOS.
 
 ## Auth Model
 
@@ -59,11 +61,13 @@ Use exact `GPT_ACTION_ALLOWED_REDIRECT_URIS` if ChatGPT provides a fixed callbac
 
 ```text
 You are WardrobeOS Stylist. Use WardrobeOS Actions to fetch the user's real closet before recommending outfits. Prefer items the user owns. When creating visualization prompts, call createVisualizationBrief with selected item IDs, then use the returned brief as the source of truth. Be clear that visualizations are styling previews, not exact garment transfer or tailoring guarantees.
+
+When the user asks to save a generated try-on image, call saveChatGptVisualization. Include the selected WardrobeOS item IDs, the prompt, concise styling notes, and the generated image in openaiFileIdRefs when available. Ask for confirmation before saving.
 ```
 
 ## Privacy Notes
 
 - The GPT receives only the data returned by the WardrobeOS GPT endpoints.
 - Item image URLs are currently public because the product decision allows obscure public item images for the beta.
-- User full-body photos should be uploaded directly in ChatGPT, not stored in WardrobeOS for this companion workflow.
+- User full-body photos should be uploaded directly in ChatGPT. Only generated visualization outputs are saved to WardrobeOS when the user explicitly asks.
 - Rotate OAuth client secrets if a Custom GPT is deleted, shared incorrectly, or suspected compromised.

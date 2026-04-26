@@ -176,6 +176,20 @@ export type SavedOutfit = {
   createdAt: string;
 };
 
+export type SavedVisualization = {
+  id: string;
+  title: string;
+  itemIds: string[];
+  occasion?: Occasion | null;
+  prompt: string;
+  stylingNotes: string;
+  imageUrl: string | null;
+  imagePath: string | null;
+  source: "chatgpt" | "wardrobeos";
+  createdAt: string;
+  items: Array<Pick<WardrobeItem, "id" | "name" | "category" | "primaryColor" | "imageData">>;
+};
+
 export type WearLogEntry = {
   id: string;
   itemIds: string[];

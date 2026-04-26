@@ -126,6 +126,66 @@ function buildOpenApiDocument(origin: string) {
             }
           }
         }
+      },
+      "/api/gpt/visualizations": {
+        get: {
+          operationId: "listSavedVisualizations",
+          summary: "List ChatGPT visualizations saved back to WardrobeOS.",
+          security: [{ OAuth2: ["visualizations:read"] }],
+          responses: {
+            "200": {
+              description: "Saved visualizations",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SavedVisualizationsResponse" } } }
+            }
+          }
+        },
+        post: {
+          operationId: "saveChatGptVisualization",
+          summary: "Save a ChatGPT-generated wardrobe visualization to WardrobeOS.",
+          description:
+            "Use this only after the user explicitly asks to save a generated visualization. Include selected WardrobeOS item IDs, prompt/notes, and any generated image file references in openaiFileIdRefs. ChatGPT will populate openaiFileIdRefs with temporary download URLs for generated images.",
+          security: [{ OAuth2: ["visualizations:write"] }],
+          "x-openai-isConsequential": true,
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["title", "itemIds", "prompt"],
+                  properties: {
+                    title: { type: "string", maxLength: 140 },
+                    occasion: { $ref: "#/components/schemas/Occasion" },
+                    itemIds: { type: "array", minItems: 1, maxItems: 8, items: { type: "string" } },
+                    prompt: { type: "string", maxLength: 4000 },
+                    stylingNotes: { type: "string", maxLength: 4000 },
+                    openaiFileIdRefs: {
+                      type: "array",
+                      maxItems: 10,
+                      description:
+                        "Generated image file references from ChatGPT. This parameter must be named openaiFileIdRefs so ChatGPT can attach DALL-E/generated images. Each runtime object includes name, id, mime_type, and a temporary download_link.",
+                      items: {
+                        type: "object",
+                        properties: {
+                          name: { type: "string" },
+                          id: { type: "string" },
+                          mime_type: { type: "string" },
+                          download_link: { type: "string", format: "uri" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            "200": {
+              description: "Saved visualization",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SaveVisualizationResponse" } } }
+            }
+          }
+        }
       }
     },
     components: {
@@ -139,7 +199,9 @@ function buildOpenApiDocument(origin: string) {
               scopes: {
                 "closet:read": "Read closet items and style profile.",
                 "outfits:read": "Read saved outfits.",
-                "outfits:suggest": "Generate outfit suggestions and visualization briefs."
+                "outfits:suggest": "Generate outfit suggestions and visualization briefs.",
+                "visualizations:read": "Read saved ChatGPT visualizations.",
+                "visualizations:write": "Save ChatGPT visualizations back to WardrobeOS."
               }
             }
           }
@@ -246,6 +308,37 @@ function buildOpenApiDocument(origin: string) {
             itemIds: { type: "array", items: { type: "string" } },
             items: { type: "array", items: { $ref: "#/components/schemas/WardrobeItem" } },
             visualizationPrompt: { type: "string" }
+          }
+        },
+        SavedVisualization: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            title: { type: "string" },
+            itemIds: { type: "array", items: { type: "string" } },
+            occasion: { type: ["string", "null"] },
+            prompt: { type: "string" },
+            stylingNotes: { type: "string" },
+            imageUrl: { type: ["string", "null"] },
+            source: { type: "string", enum: ["chatgpt", "wardrobeos"] },
+            createdAt: { type: "string" },
+            items: { type: "array", items: { $ref: "#/components/schemas/WardrobeItem" } }
+          }
+        },
+        SavedVisualizationsResponse: {
+          type: "object",
+          properties: {
+            closet: { $ref: "#/components/schemas/Closet" },
+            count: { type: "integer" },
+            visualizations: { type: "array", items: { $ref: "#/components/schemas/SavedVisualization" } }
+          }
+        },
+        SaveVisualizationResponse: {
+          type: "object",
+          properties: {
+            ok: { type: "boolean" },
+            visualization: { $ref: "#/components/schemas/SavedVisualization" },
+            appUrl: { type: "string" }
           }
         }
       }
