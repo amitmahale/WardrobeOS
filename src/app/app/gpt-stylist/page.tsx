@@ -1,12 +1,13 @@
 "use client";
 
-import { type ComponentType, useState } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Copy, ExternalLink, ImageIcon, Luggage, Shirt, Sparkles, Utensils } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, Input, Label } from "@/components/ui/field";
 import { getClosetGaps, type ClosetGap } from "@/lib/domain/closetGaps";
 import { createPlaceholderImage } from "@/lib/domain/placeholderImage";
 import { getUnderusedItems } from "@/lib/domain/insights";
@@ -14,7 +15,8 @@ import { useWardrobeStore } from "@/lib/store/wardrobe-store";
 import type { Occasion, WardrobeItem } from "@/lib/types";
 import { labelize } from "@/lib/utils";
 
-const customGptUrl = process.env.NEXT_PUBLIC_CUSTOM_GPT_URL || "https://chatgpt.com";
+const configuredCustomGptUrl = process.env.NEXT_PUBLIC_CUSTOM_GPT_URL?.trim() || "";
+const customGptUrlStorageKey = "wardrobe-os-custom-gpt-url";
 
 type PromptCard = {
   key: string;
@@ -35,6 +37,18 @@ export default function GptStylistPage() {
   const promptCards = buildPromptCards(active, gaps, underused);
   const heroItems = active.filter((item) => item.imageData).slice(0, 8);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [customGptUrl, setCustomGptUrl] = useState(configuredCustomGptUrl);
+  const [customGptUrlInput, setCustomGptUrlInput] = useState(configuredCustomGptUrl);
+  const [urlMessage, setUrlMessage] = useState<string | null>(null);
+  const hasCustomGptUrl = Boolean(customGptUrl.trim());
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(customGptUrlStorageKey);
+    if (saved) {
+      setCustomGptUrl(saved);
+      setCustomGptUrlInput(saved);
+    }
+  }, []);
 
   async function copyPrompt(key: string, prompt: string) {
     try {
@@ -54,6 +68,35 @@ export default function GptStylistPage() {
     window.setTimeout(() => setCopiedKey((current) => (current === key ? null : current)), 1800);
   }
 
+  function saveCustomGptUrl() {
+    try {
+      const normalized = normalizeCustomGptUrl(customGptUrlInput);
+      if (!normalized) {
+        window.localStorage.removeItem(customGptUrlStorageKey);
+        setCustomGptUrl(configuredCustomGptUrl);
+        setCustomGptUrlInput(configuredCustomGptUrl);
+        setUrlMessage(configuredCustomGptUrl ? "Using the deployed Custom GPT URL." : "Custom GPT URL cleared.");
+        return;
+      }
+
+      window.localStorage.setItem(customGptUrlStorageKey, normalized);
+      setCustomGptUrl(normalized);
+      setCustomGptUrlInput(normalized);
+      setUrlMessage("Custom GPT URL saved on this device.");
+    } catch (error) {
+      setUrlMessage(error instanceof Error ? error.message : "Paste a valid ChatGPT Custom GPT URL.");
+    }
+  }
+
+  function openCustomGpt() {
+    window.open(resolveCustomGptUrl(customGptUrl), "_blank", "noopener,noreferrer");
+  }
+
+  function launchPrompt(key: string, prompt: string) {
+    void copyPrompt(key, prompt);
+    openCustomGpt();
+  }
+
   return (
     <div className="grid gap-6" data-testid="gpt-launchpad">
       <Card className="relative overflow-hidden">
@@ -70,11 +113,9 @@ export default function GptStylistPage() {
               can upload a full-length photo in ChatGPT and ask it to visualize closet combinations on you.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild>
-                <Link href={customGptUrl} target="_blank" rel="noreferrer">
-                  <ExternalLink className="mr-2 size-4" />
-                  Open ChatGPT stylist
-                </Link>
+              <Button onClick={openCustomGpt}>
+                <ExternalLink className="mr-2 size-4" />
+                {hasCustomGptUrl ? "Open Custom GPT" : "Open GPTs page"}
               </Button>
               <Button asChild variant="secondary">
                 <Link href="/app/closet">
@@ -84,7 +125,8 @@ export default function GptStylistPage() {
               </Button>
             </div>
             <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              If this opens the generic ChatGPT home, set `NEXT_PUBLIC_CUSTOM_GPT_URL` to your published Custom GPT URL.
+              ChatGPT does not reliably support URL-prefilling a new prompt. Use “Copy & open Custom GPT” below, then
+              paste the copied prompt into the Custom GPT.
             </p>
           </div>
 
@@ -107,6 +149,34 @@ export default function GptStylistPage() {
               </div>
             )}
           </div>
+        </div>
+      </Card>
+
+      <Card className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+          <CardTitle>Custom GPT link</CardTitle>
+          <CardDescription>
+            Paste the published GPT share URL once. Without it, the launchpad can only open the generic GPTs page.
+          </CardDescription>
+          <div className="mt-4 grid gap-3">
+            <Field>
+              <Label htmlFor="custom-gpt-url">Published Custom GPT URL</Label>
+              <Input
+                id="custom-gpt-url"
+                value={customGptUrlInput}
+                onChange={(event) => setCustomGptUrlInput(event.target.value)}
+                placeholder="https://chatgpt.com/g/g-..."
+              />
+            </Field>
+            {urlMessage ? <p className="text-sm text-muted-foreground">{urlMessage}</p> : null}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={saveCustomGptUrl}>Save GPT link</Button>
+          <Button variant="secondary" onClick={openCustomGpt}>
+            <ExternalLink className="mr-2 size-4" />
+            Test link
+          </Button>
         </div>
       </Card>
 
@@ -148,11 +218,9 @@ export default function GptStylistPage() {
                   <Copy className="mr-2 size-4" />
                   {copiedKey === card.key ? "Copied" : "Copy prompt"}
                 </Button>
-                <Button asChild variant="secondary">
-                  <Link href={customGptUrl} target="_blank" rel="noreferrer">
-                    <ExternalLink className="mr-2 size-4" />
-                    Open ChatGPT
-                  </Link>
+                <Button variant="secondary" onClick={() => launchPrompt(card.key, card.prompt)}>
+                  <ExternalLink className="mr-2 size-4" />
+                  {hasCustomGptUrl ? "Copy & open Custom GPT" : "Copy & open GPTs page"}
                 </Button>
               </div>
             </Card>
@@ -305,4 +373,27 @@ function buildPromptCards(active: WardrobeItem[], gaps: ClosetGap[], underused: 
 
 function selectByOccasion(items: WardrobeItem[], occasion: Occasion) {
   return items.filter((item) => item.occasions.includes(occasion)).slice(0, 6);
+}
+
+function resolveCustomGptUrl(value: string) {
+  return value.trim() || "https://chatgpt.com/gpts";
+}
+
+function normalizeCustomGptUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error("Paste the full Custom GPT URL, usually https://chatgpt.com/g/g-...");
+  }
+
+  const isChatGptHost = url.hostname === "chatgpt.com" || url.hostname === "chat.openai.com";
+  if (!isChatGptHost || !url.pathname.startsWith("/g/")) {
+    throw new Error("Use the Custom GPT share URL, usually https://chatgpt.com/g/g-...");
+  }
+
+  return url.toString();
 }

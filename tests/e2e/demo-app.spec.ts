@@ -72,7 +72,8 @@ test("GPT stylist launchpad provides visual try-on prompts", async ({ page }) =>
   await expect(page.getByRole("heading", { name: "GPT Stylist" })).toBeVisible();
   await expect(page.getByTestId("gpt-launchpad")).toBeVisible();
   await expect(page.getByText(/visualize those selected closet items on me/i)).toBeVisible();
-  await expect(page.getByRole("link", { name: /open chatgpt stylist/i })).toBeVisible();
+  await expect(page.getByLabel("Published Custom GPT URL")).toBeVisible();
+  await expect(page.getByRole("button", { name: /copy & open/i }).first()).toBeVisible();
 });
 
 test("can add a manual item and see it in the closet", async ({ page }) => {
