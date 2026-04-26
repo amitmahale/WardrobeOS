@@ -108,7 +108,7 @@ The exported PDF is served from `public/docs/wardrobeos-architecture-magazine.pd
 
 ## iPhone PWA Login
 
-Use an email-code-only Magic Link template for the installed PWA. Avoid including `{{ .ConfirmationURL }}` because email clients can pre-open the link and consume the token before the user enters the code.
+Use email-code-only Supabase templates for the installed PWA. For OTP-only auth, configure **both** "Magic Link" and "Confirm signup" templates to avoid including `{{ .ConfirmationURL }}` (new users hit "Confirm signup", existing users usually hit "Magic Link"). Email clients can pre-open links and consume the token before the user enters the code.
 
 ```html
 <h2>Your Wardrobe OS login code</h2>

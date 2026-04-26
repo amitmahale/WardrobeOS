@@ -47,6 +47,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: normalizedEmail,
       options: {
+        shouldCreateUser: true,
         emailRedirectTo: `${getAuthRedirectOrigin()}/auth/callback?next=${encodeURIComponent(nextPath)}`
       }
     });
@@ -88,7 +89,9 @@ export default function LoginPage() {
     }
 
     setVerifyState({
-      error: `${lastError} Request a fresh code and make sure the email template contains only {{ .Token }}, not {{ .ConfirmationURL }}.`
+      error:
+        `${lastError} Request a fresh code and make sure both Supabase templates ("Magic Link" and ` +
+        `"Confirm signup") contain only {{ .Token }}, not {{ .ConfirmationURL }}.`
     });
     setVerifying(false);
   }
