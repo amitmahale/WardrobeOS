@@ -79,7 +79,7 @@ export default function OutfitLabPage() {
         <CardHeader>
           <div>
             <CardTitle>Outfit query</CardTitle>
-            <CardDescription>Rule-based and explainable. AI is not used for ranking.</CardDescription>
+            <CardDescription>Generate visual outfit cards from real closet images. Use GPT only when you want a try-on preview.</CardDescription>
           </div>
         </CardHeader>
         <div className="grid gap-4">
@@ -147,6 +147,20 @@ export default function OutfitLabPage() {
       </Card>
 
       <section className="grid gap-4">
+        {results.length ? (
+          <Card className="relative overflow-hidden">
+            <div className="absolute -right-16 -top-16 size-40 rounded-full bg-brand/10 blur-3xl" />
+            <CardHeader className="relative">
+              <div>
+                <CardTitle>Visual outfit board</CardTitle>
+                <CardDescription>
+                  Each recommendation is built from owned pieces. Use “Visualize in GPT” to copy the outfit prompt and open
+                  the WardrobeOS Stylist.
+                </CardDescription>
+              </div>
+            </CardHeader>
+          </Card>
+        ) : null}
         {results.length ? (
           results.map((recommendation) => (
             <OutfitCard

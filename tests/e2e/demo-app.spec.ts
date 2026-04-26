@@ -50,6 +50,8 @@ test("dashboard renders from seeded closet", async ({ page }) => {
 test("outfit lab renders recommendations", async ({ page }) => {
   await gotoApp(page, "/app/outfits");
   await expect(page.getByRole("heading", { name: "Outfit Lab" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Visual outfit board" })).toBeVisible();
+  await expect(page.getByTestId("outfit-image-grid").first()).toBeVisible();
   await expect(page.getByText(/balanced color pairing|strong color pairing/i).first()).toBeVisible();
 });
 
