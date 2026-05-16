@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Ban, Bookmark, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,14 @@ export function PurchaseCard({
   recommendation: PurchaseRecommendation;
   onFeedback?: (key: string, feedback: "saved" | "dismissed" | "thumbs_up" | "thumbs_down") => void;
 }) {
+  const [message, setMessage] = useState<string | null>(null);
+
+  function act(feedback: "saved" | "dismissed" | "thumbs_up" | "thumbs_down", text: string) {
+    onFeedback?.(recommendation.key, feedback);
+    setMessage(text);
+    window.setTimeout(() => setMessage((current) => (current === text ? null : current)), 2400);
+  }
+
   return (
     <Card className="grid gap-5 overflow-hidden md:grid-cols-[190px_1fr]">
       <div className="relative min-h-48 overflow-hidden rounded-3xl border border-black/[0.08] bg-gradient-to-br from-[#f3f1ec] to-[#dce3ec]" data-testid="purchase-card-image">
@@ -98,23 +107,28 @@ export function PurchaseCard({
         ) : null}
 
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => onFeedback?.(recommendation.key, "saved")}>
+          <Button size="sm" onClick={() => act("saved", "Candidate saved.")}>
             <Bookmark className="mr-2 size-3.5" />
             Save candidate
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onFeedback?.(recommendation.key, "thumbs_up")}>
+          <Button size="sm" variant="ghost" onClick={() => act("thumbs_up", "Marked useful.")}>
             <ThumbsUp className="mr-2 size-3.5" />
             Useful
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onFeedback?.(recommendation.key, "thumbs_down")}>
+          <Button size="sm" variant="ghost" onClick={() => act("thumbs_down", "Feedback recorded.")}>
             <ThumbsDown className="mr-2 size-3.5" />
             Not useful
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onFeedback?.(recommendation.key, "dismissed")}>
+          <Button size="sm" variant="ghost" onClick={() => act("dismissed", "Candidate dismissed.")}>
             <Ban className="mr-2 size-3.5" />
             Dismiss
           </Button>
         </div>
+        {message ? (
+          <p className="rounded-2xl border border-brand/20 bg-brand/10 p-3 text-sm font-semibold text-brand" aria-live="polite">
+            {message}
+          </p>
+        ) : null}
       </div>
     </Card>
   );

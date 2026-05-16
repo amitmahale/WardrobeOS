@@ -57,6 +57,7 @@ export default function ReliabilityPage() {
       setMessage(payload.error?.message || "Could not dismiss upload.");
       return;
     }
+    setMessage(`${upload.filename} dismissed.`);
     await loadDiagnostics({ keepMessage: true });
   }
 

@@ -36,6 +36,13 @@ const closetTiles = [
   ["Sneakers", "Casual", "from-[#f4f6f8] to-[#aeb8c4]", ""]
 ];
 
+const homeNav = [
+  ["Today", "/app/dashboard"],
+  ["Closet", "/app/closet"],
+  ["Style", "/app/outfits"],
+  ["Plan", "/app/buy-next"]
+];
+
 export default async function HomePage({
   searchParams
 }: {
@@ -70,13 +77,14 @@ export default async function HomePage({
             WardrobeOS
           </Link>
           <nav className="hidden rounded-full border border-black/[0.08] bg-white p-1 shadow-soft lg:flex">
-            {["Today", "Closet", "Style", "Plan"].map((item, index) => (
-              <span
+            {homeNav.map(([item, href], index) => (
+              <Link
                 key={item}
+                href={href}
                 className={index === 0 ? "rounded-full bg-foreground px-5 py-2 text-sm font-bold text-white" : "px-5 py-2 text-sm font-bold text-muted-foreground"}
               >
                 {item}
-              </span>
+              </Link>
             ))}
           </nav>
           <div className="flex justify-end gap-2">
@@ -184,17 +192,20 @@ export default async function HomePage({
                 Work-ready, mild weather, revives an underused piece.
               </p>
               <div className="mt-4 flex gap-2">
-                <Button size="sm">Wore this</Button>
-                <Button size="sm" variant="secondary">
-                  Try-on
+                <Button asChild size="sm">
+                  <Link href="/app/dashboard">Wore this</Link>
+                </Button>
+                <Button asChild size="sm" variant="secondary">
+                  <Link href="/app/gpt-stylist">Try-on</Link>
                 </Button>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-4 border-t border-black/[0.08] px-4 py-4 text-center text-xs font-semibold text-muted-foreground">
-              <span>Today</span>
-              <span>Closet</span>
-              <span>Style</span>
-              <span>Plan</span>
+              {homeNav.map(([item, href]) => (
+                <Link key={item} href={href} className="transition hover:text-foreground">
+                  {item}
+                </Link>
+              ))}
             </div>
           </div>
           <div className="self-center">

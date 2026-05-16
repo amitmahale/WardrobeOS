@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { OutfitCard } from "@/components/recommendations/outfit-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -20,10 +21,17 @@ export default function OutfitLabPage() {
   const markOutfitWorn = useWardrobeStore((state) => state.markOutfitWorn);
   const recordFeedback = useWardrobeStore((state) => state.recordFeedback);
   const serverBacked = useWardrobeStore((state) => state.serverBacked);
-  const results = getOutfitSuggestions(items, query).slice(0, 8);
+  const [submittedQuery, setSubmittedQuery] = useState(query);
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
+  const results = getOutfitSuggestions(items, submittedQuery).slice(0, 8);
 
   function patch(patchValue: Partial<OutfitQuery>) {
     setQuery({ ...query, ...patchValue });
+  }
+
+  function generateOutfits() {
+    setSubmittedQuery(query);
+    setGeneratedAt(new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   }
 
   function handleSave(recommendation: OutfitRecommendation) {
@@ -31,7 +39,7 @@ export default function OutfitLabPage() {
       key: recommendation.key,
       name: recommendation.items.map((item) => item.name).join(" + "),
       itemIds: recommendation.items.map((item) => item.id),
-      occasion: query.occasion
+      occasion: submittedQuery.occasion
     });
     recordFeedback({ targetType: "outfit_recommendation", targetKey: recommendation.key, feedback: "saved" });
     if (serverBacked) {
@@ -42,7 +50,7 @@ export default function OutfitLabPage() {
           key: recommendation.key,
           name: recommendation.items.map((item) => item.name).join(" + "),
           itemIds: recommendation.items.map((item) => item.id),
-          occasion: query.occasion
+          occasion: submittedQuery.occasion
         })
       }).catch(() => {});
       syncFeedback(recommendation.key, "saved");
@@ -150,7 +158,12 @@ export default function OutfitLabPage() {
               <option value="false">Ignore wear counts</option>
             </Select>
           </Field>
-          <Button onClick={() => setQuery({ ...query })}>Generate outfits</Button>
+          <Button onClick={generateOutfits}>Generate outfits</Button>
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            {generatedAt
+              ? `Showing results generated at ${generatedAt}.`
+              : "Edit filters, then generate to refresh the outfit list."}
+          </p>
         </div>
       </Card>
 
@@ -161,7 +174,7 @@ export default function OutfitLabPage() {
               <div>
                 <CardTitle>Recommended outfits</CardTitle>
                 <CardDescription>
-                  Each recommendation is built from owned pieces. Save it, wear it, or send it to the try-on flow.
+                  Each recommendation is built from owned pieces using the submitted query.
                 </CardDescription>
               </div>
               <Badge variant="blue">{results.length} ideas</Badge>

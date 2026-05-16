@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { PurchaseCard } from "@/components/recommendations/purchase-card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -21,12 +22,19 @@ export default function BuyNextPage() {
   const setQuery = useWardrobeStore((state) => state.setBuyNextQuery);
   const recordFeedback = useWardrobeStore((state) => state.recordFeedback);
   const serverBacked = useWardrobeStore((state) => state.serverBacked);
-  const recommendations = getPurchaseSuggestions(items, query).slice(0, 8);
+  const [submittedQuery, setSubmittedQuery] = useState(query);
+  const [analyzedAt, setAnalyzedAt] = useState<string | null>(null);
+  const recommendations = getPurchaseSuggestions(items, submittedQuery).slice(0, 8);
   const gaps = getClosetGaps(items).slice(0, 4);
   const top = recommendations[0];
 
   function patch(patchValue: Partial<BuyNextQuery>) {
     setQuery({ ...query, ...patchValue });
+  }
+
+  function runAnalysis() {
+    setSubmittedQuery(query);
+    setAnalyzedAt(new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   }
 
   return (
@@ -103,7 +111,12 @@ export default function BuyNextPage() {
                 <option value="false">Show all candidates</option>
               </Select>
             </Field>
-            <Button onClick={() => setQuery({ ...query })}>Run buy-next analysis</Button>
+            <Button onClick={runAnalysis}>Run buy-next analysis</Button>
+            <p className="text-xs text-muted-foreground" aria-live="polite">
+              {analyzedAt
+                ? `Showing purchase analysis from ${analyzedAt}.`
+                : "Edit filters, then run analysis to refresh candidates."}
+            </p>
           </div>
         </Card>
 

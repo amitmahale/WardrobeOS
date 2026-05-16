@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, Copy, ExternalLink, Heart, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,13 @@ export function OutfitCard({
   onWore?: (recommendation: OutfitRecommendation) => void;
   onFeedback?: (key: string, feedback: "thumbs_up" | "thumbs_down") => void;
 }) {
+  const [message, setMessage] = useState<string | null>(null);
+
+  function confirm(text: string) {
+    setMessage(text);
+    window.setTimeout(() => setMessage((current) => (current === text ? null : current)), 2400);
+  }
+
   async function copyVisualPrompt(openAfterCopy = false) {
     const prompt = buildVisualPrompt(recommendation);
     try {
@@ -36,6 +44,7 @@ export function OutfitCard({
       document.execCommand("copy");
       textarea.remove();
     }
+    confirm(openAfterCopy ? "Prompt copied. Opening GPT in a new tab." : "Prompt copied.");
     if (openAfterCopy) window.open(customGptUrl, "_blank", "noopener,noreferrer");
   }
 
@@ -96,11 +105,24 @@ export function OutfitCard({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => onSave?.(recommendation)}>
+          <Button
+            size="sm"
+            onClick={() => {
+              onSave?.(recommendation);
+              confirm("Outfit saved.");
+            }}
+          >
             <Heart className="mr-2 size-3.5" />
             Save
           </Button>
-          <Button size="sm" variant="secondary" onClick={() => onWore?.(recommendation)}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              onWore?.(recommendation);
+              confirm("Wear log updated.");
+            }}
+          >
             <CheckCircle2 className="mr-2 size-3.5" />
             Wore this
           </Button>
@@ -112,15 +134,34 @@ export function OutfitCard({
             <Copy className="mr-2 size-3.5" />
             Copy prompt
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onFeedback?.(recommendation.key, "thumbs_up")}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              onFeedback?.(recommendation.key, "thumbs_up");
+              confirm("Marked useful.");
+            }}
+          >
             <ThumbsUp className="mr-2 size-3.5" />
             Useful
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onFeedback?.(recommendation.key, "thumbs_down")}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              onFeedback?.(recommendation.key, "thumbs_down");
+              confirm("Feedback recorded.");
+            }}
+          >
             <ThumbsDown className="mr-2 size-3.5" />
             Not it
           </Button>
         </div>
+        {message ? (
+          <p className="rounded-2xl border border-brand/20 bg-brand/10 p-3 text-sm font-semibold text-brand" aria-live="polite">
+            {message}
+          </p>
+        ) : null}
       </div>
     </Card>
   );

@@ -5,6 +5,9 @@ test("public landing and PWA manifest are available", async ({ page, request }) 
   await expect(page.getByRole("heading", { name: /a calmer way to get dressed/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /open wardrobeos/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /see how it works/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Style$/ }).first()).toHaveAttribute("href", "/app/outfits");
+  await expect(page.getByRole("link", { name: /^Plan$/ }).first()).toHaveAttribute("href", "/app/buy-next");
+  await expect(page.getByRole("link", { name: /^Try-on$/ })).toHaveAttribute("href", "/app/gpt-stylist");
 
   const manifest = await request.get("/manifest.webmanifest");
   expect(manifest.ok()).toBeTruthy();

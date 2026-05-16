@@ -59,9 +59,13 @@ export default function VisualizationsPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={loadVisualizations} disabled={!serverBacked || isLoading}>
+            <Button
+              onClick={loadVisualizations}
+              disabled={!serverBacked || isLoading}
+              title={serverBacked ? undefined : "Sign in to refresh saved visualizations."}
+            >
               <RefreshCw className="mr-2 size-4" />
-              {isLoading ? "Refreshing..." : "Refresh"}
+              {!serverBacked ? "Refresh (sign in required)" : isLoading ? "Refreshing..." : "Refresh"}
             </Button>
             <Button asChild variant="secondary">
               <Link href="/app/gpt-stylist">

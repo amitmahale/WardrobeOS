@@ -63,6 +63,7 @@ const titleMap: Array<[string, string, string]> = [
 export function AppShell({ children, userEmail }: { children: React.ReactNode; userEmail?: string | null }) {
   const pathname = usePathname();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [shellMessage, setShellMessage] = useState<string | null>(null);
   const resetDemo = useWardrobeStore((state) => state.resetDemo);
   const markServerSession = useWardrobeStore((state) => state.markServerSession);
   const items = useWardrobeStore((state) => state.items);
@@ -78,6 +79,12 @@ export function AppShell({ children, userEmail }: { children: React.ReactNode; u
   useEffect(() => {
     if (userEmail) markServerSession(userEmail);
   }, [markServerSession, userEmail]);
+
+  function resetDemoWithMessage() {
+    resetDemo();
+    setShellMessage("Demo closet reset.");
+    window.setTimeout(() => setShellMessage((current) => (current === "Demo closet reset." ? null : current)), 2400);
+  }
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]" data-testid="app-shell" data-hydrated={isHydrated}>
@@ -155,10 +162,15 @@ export function AppShell({ children, userEmail }: { children: React.ReactNode; u
               </Button>
             </form>
           ) : (
-            <Button variant="secondary" onClick={resetDemo}>
+            <Button variant="secondary" onClick={resetDemoWithMessage}>
               Reset demo data
             </Button>
           )}
+          {shellMessage ? (
+            <p className="rounded-2xl border border-brand/20 bg-brand/10 p-3 text-xs font-semibold text-brand" aria-live="polite">
+              {shellMessage}
+            </p>
+          ) : null}
         </div>
       </aside>
 

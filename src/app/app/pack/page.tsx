@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { BadgeCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -16,10 +17,17 @@ export default function PackPage() {
   const items = useWardrobeStore((state) => state.items);
   const query = useWardrobeStore((state) => state.packQuery);
   const setQuery = useWardrobeStore((state) => state.setPackQuery);
-  const plan = getPackPlan(items, query);
+  const [submittedQuery, setSubmittedQuery] = useState(query);
+  const [builtAt, setBuiltAt] = useState<string | null>(null);
+  const plan = getPackPlan(items, submittedQuery);
 
   function patch(patchValue: Partial<PackQuery>) {
     setQuery({ ...query, ...patchValue });
+  }
+
+  function buildPlan() {
+    setSubmittedQuery(query);
+    setBuiltAt(new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
   }
 
   return (
@@ -92,7 +100,10 @@ export default function PackPage() {
               onChange={(event) => patch({ shoeLimit: Number(event.target.value) })}
             />
           </Field>
-          <Button onClick={() => setQuery({ ...query })}>Build packing plan</Button>
+          <Button onClick={buildPlan}>Build packing plan</Button>
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            {builtAt ? `Showing packing plan built at ${builtAt}.` : "Edit trip inputs, then build to refresh the capsule."}
+          </p>
         </div>
       </Card>
 
@@ -109,7 +120,7 @@ export default function PackPage() {
             <div className="flex flex-wrap gap-2">
               {plan.items.map((item) => (
                 <Link key={item.id} href={`/app/items/${item.id}`}>
-              <Badge variant="outline">{item.name}</Badge>
+                  <Badge variant="outline">{item.name}</Badge>
                 </Link>
               ))}
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Database, KeyRound, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ export default function SettingsPage() {
   const serverBacked = useWardrobeStore((state) => state.serverBacked);
   const feedbackCount = useWardrobeStore((state) => state.feedbackEvents.length);
   const savedOutfits = useWardrobeStore((state) => state.savedOutfits.length);
+  const [message, setMessage] = useState<string | null>(null);
 
   function patch(patchValue: Partial<StyleProfile>) {
     setProfile({ ...profile, ...patchValue });
@@ -34,6 +36,12 @@ export default function SettingsPage() {
     if (current.has(color)) current.delete(color);
     else current.add(color);
     patch({ [key]: [...current] });
+    setMessage("Style baseline updated.");
+  }
+
+  function resetDemoWithMessage() {
+    resetDemo();
+    setMessage("Demo closet reset.");
   }
 
   return (
@@ -140,10 +148,15 @@ export default function SettingsPage() {
               <span>Feedback events</span>
               <Badge>{feedbackCount}</Badge>
             </div>
-            <Button variant="secondary" onClick={resetDemo}>
+            <Button variant="secondary" onClick={resetDemoWithMessage}>
               <RotateCcw className="mr-2 size-4" />
               Reset demo closet
             </Button>
+            {message ? (
+              <p className="rounded-2xl border border-brand/20 bg-brand/10 p-3 text-sm font-semibold text-brand" aria-live="polite">
+                {message}
+              </p>
+            ) : null}
           </div>
         </Card>
       </section>

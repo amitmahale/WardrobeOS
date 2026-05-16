@@ -115,6 +115,18 @@ test("outfit lab renders recommendations", async ({ page }) => {
   await expect(page.getByText(/balanced color pairing|strong color pairing/i).first()).toBeVisible();
 });
 
+test("style actions show visible feedback", async ({ page }) => {
+  await gotoApp(page, "/app/outfits");
+  await page.getByRole("button", { name: /^Generate outfits$/ }).click();
+  await expect(page.getByText(/showing results generated at/i)).toBeVisible();
+  await page.getByRole("button", { name: /^Save$/ }).first().click();
+  await expect(page.getByText("Outfit saved.")).toBeVisible();
+  await page.getByRole("button", { name: /^Wore this$/ }).first().click();
+  await expect(page.getByText("Wear log updated.")).toBeVisible();
+  await page.getByRole("button", { name: /^Useful$/ }).first().click();
+  await expect(page.getByText("Marked useful.")).toBeVisible();
+});
+
 test("buy-next renders purchase candidates", async ({ page }) => {
   await gotoApp(page, "/app/buy-next");
   await expect(page.getByRole("heading", { name: "Plan" })).toBeVisible();
@@ -123,10 +135,26 @@ test("buy-next renders purchase candidates", async ({ page }) => {
   await expect(page.getByTestId("purchase-card-image").first()).toBeVisible();
 });
 
+test("plan actions show visible feedback", async ({ page }) => {
+  await gotoApp(page, "/app/buy-next");
+  await page.getByRole("button", { name: /^Run buy-next analysis$/ }).click();
+  await expect(page.getByText(/showing purchase analysis from/i)).toBeVisible();
+  await page.getByRole("button", { name: /^Save candidate$/ }).first().click();
+  await expect(page.getByText("Candidate saved.")).toBeVisible();
+  await page.getByRole("button", { name: /^Dismiss$/ }).first().click();
+  await expect(page.getByText("Candidate dismissed.")).toBeVisible();
+});
+
 test("pack planner renders recommended capsule", async ({ page }) => {
   await gotoApp(page, "/app/pack");
   await expect(page.getByRole("heading", { name: "Pack Planner" })).toBeVisible();
   await expect(page.getByText(/recommended capsule/i)).toBeVisible();
+});
+
+test("pack planner build button shows visible feedback", async ({ page }) => {
+  await gotoApp(page, "/app/pack");
+  await page.getByRole("button", { name: /^Build packing plan$/ }).click();
+  await expect(page.getByText(/showing packing plan built at/i)).toBeVisible();
 });
 
 test("GPT stylist launchpad provides visual try-on prompts", async ({ page }) => {
@@ -142,6 +170,7 @@ test("saved visualizations page renders the GPT save workflow", async ({ page })
   await gotoApp(page, "/app/visualizations");
   await expect(page.getByRole("heading", { name: "Visualizations", exact: true })).toBeVisible();
   await expect(page.getByText(/save this visualization to wardrobeos/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /refresh \(sign in required\)/i })).toBeDisabled();
   await expect(page.getByRole("link", { name: /start in gpt stylist/i })).toBeVisible();
 });
 
