@@ -27,7 +27,7 @@ export function ItemCard({
       <Link href={`/app/items/${item.id}`} className="block">
         <div
           className={cn(
-            "relative overflow-hidden bg-[#11192a]",
+            "relative overflow-hidden bg-gradient-to-br from-[#f3f1ec] to-[#dce3ec]",
             isList ? "h-44 rounded-t-3xl sm:h-full sm:rounded-l-3xl sm:rounded-r-none" : "aspect-[1.15/1] rounded-t-3xl"
           )}
         >
@@ -42,7 +42,7 @@ export function ItemCard({
             />
           ) : null}
           {item.processingStatus === "processing" ? (
-            <span className="absolute left-3 top-3 rounded-full border border-signal-amber/30 bg-signal-amber/15 px-3 py-1 text-xs font-medium text-signal-amber">
+            <span className="absolute left-3 top-3 rounded-full border border-signal-amber/20 bg-white/90 px-3 py-1 text-xs font-bold text-signal-amber shadow-soft">
               Processing
             </span>
           ) : null}
@@ -52,7 +52,7 @@ export function ItemCard({
       <div className={cn("grid gap-4 p-4", isList && "sm:grid-cols-[1fr_auto] sm:items-center")}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <Link href={`/app/items/${item.id}`} className="font-semibold transition hover:text-brand">
+            <Link href={`/app/items/${item.id}`} className="font-black transition hover:text-brand">
               {item.name}
             </Link>
             <div className="mt-1 text-sm text-muted-foreground">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Camera, Sparkles } from "lucide-react";
@@ -11,6 +11,7 @@ import { Field, Input, Label, Select, Textarea } from "@/components/ui/field";
 import { CATEGORY_OPTIONS, COLOR_NAMES, OCCASIONS, SEASONS } from "@/lib/constants";
 import { estimateDominantColorFamily, resizeImageToDataUrl } from "@/lib/browserImage";
 import { emptyDraft, useWardrobeStore } from "@/lib/store/wardrobe-store";
+import { createUploadId, recordClientEvent, recordUploadTrust } from "@/lib/trust/client";
 import type { ColorFamily, ItemCategory, Occasion, Season, WardrobeItem } from "@/lib/types";
 import { labelize } from "@/lib/utils";
 
@@ -20,13 +21,22 @@ export default function NewItemPage() {
   const upsertItem = useWardrobeStore((state) => state.upsertItem);
   const serverBacked = useWardrobeStore((state) => state.serverBacked);
   const [draft, setDraft] = useState(emptyDraft());
+  const draftRef = useRef(draft);
   const [error, setError] = useState<string | null>(null);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
+  const [autosaveMessage, setAutosaveMessage] = useState<string | null>(null);
   const [isTagging, setIsTagging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [, setServerItemId] = useState<string | null>(null);
+  const [currentUploadId, setCurrentUploadId] = useState<string | null>(null);
+  const serverItemIdRef = useRef<string | null>(null);
   const taggingRunRef = useRef(0);
   const aiEnabled = process.env.NEXT_PUBLIC_ENABLE_AI_TAGGING === "true";
   const canUseAi = serverBacked && aiEnabled;
+
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
 
   async function handleFile(file?: File) {
     setError(null);
@@ -42,25 +52,53 @@ export default function NewItemPage() {
 
     const dataUrl = await resizeImageToDataUrl(file);
     const color = await estimateDominantColorFamily(dataUrl);
-    setDraft((current) => ({ ...current, imageData: dataUrl, imageName: file.name, primaryColor: color }));
+    const uploadId = createUploadId("single");
+    setCurrentUploadId(uploadId);
+    const nextDraft = {
+      ...draft,
+      imageData: dataUrl,
+      imageName: file.name,
+      name: draft.name.trim() || nameFromFilename(file.name),
+      primaryColor: color
+    };
+    setDraft(nextDraft);
+    draftRef.current = nextDraft;
+    if (serverBacked) {
+      void recordUploadTrust({
+        uploadId,
+        filename: file.name,
+        status: "pending",
+        stage: "selected",
+        metadata: { route: "/app/items/new", size: file.size, type: file.type }
+      });
+    }
+    let savedItemId = serverItemIdRef.current;
+    if (serverBacked) {
+      const item = await autosaveDraft(nextDraft, { createIfMissing: true, uploadId });
+      savedItemId = item?.id || savedItemId;
+    }
     if (canUseAi) {
-      void suggestTagsForImage(dataUrl, true);
+      void suggestTagsForImage(dataUrl, true, savedItemId || undefined);
     } else {
       setAiMessage(aiEnabled ? "Sign in to apply AI tags automatically after upload." : null);
     }
   }
 
   function update<K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) {
-    setDraft((current) => ({ ...current, [key]: value }));
+    const next = { ...draft, [key]: value };
+    setDraft(next);
+    draftRef.current = next;
+    syncExistingServerDraft(next);
   }
 
   function toggleArray(key: "seasons" | "occasions", value: Season | Occasion) {
-    setDraft((current) => {
-      const currentSet = new Set(current[key]);
-      if (currentSet.has(value as never)) currentSet.delete(value as never);
-      else currentSet.add(value as never);
-      return { ...current, [key]: [...currentSet] };
-    });
+    const currentSet = new Set(draft[key]);
+    if (currentSet.has(value as never)) currentSet.delete(value as never);
+    else currentSet.add(value as never);
+    const next = { ...draft, [key]: [...currentSet] };
+    setDraft(next);
+    draftRef.current = next;
+    syncExistingServerDraft(next);
   }
 
   async function submit() {
@@ -91,7 +129,24 @@ export default function NewItemPage() {
       return;
     }
 
+    const persistedItemId = serverItemIdRef.current;
+    if (persistedItemId) {
+      const item = await updateServerItem(persistedItemId, draft);
+      upsertItem(item);
+      await recordClientEvent({
+        eventType: "item.saved",
+        itemId: item.id,
+        uploadId: currentUploadId,
+        route: "/app/items/new",
+        message: `${item.name} saved from single-item flow.`
+      });
+      router.push(`/app/items/${item.id}`);
+      return;
+    }
+
+    const uploadId = currentUploadId || createUploadId("single");
     let imagePath: string | null = null;
+    let publicUrl: string | null = null;
     if (draft.imageData) {
       const upload = await fetch("/api/upload/item-image", {
         method: "POST",
@@ -99,7 +154,18 @@ export default function NewItemPage() {
         body: JSON.stringify({ imageData: draft.imageData, filename: draft.imageName || "item.jpg" })
       });
       if (!upload.ok) throw new Error("Image upload failed.");
-      imagePath = ((await upload.json()) as { path: string }).path;
+      const uploadPayload = (await upload.json()) as { path: string; publicUrl?: string };
+      imagePath = uploadPayload.path;
+      publicUrl = uploadPayload.publicUrl || null;
+      await recordUploadTrust({
+        uploadId,
+        filename: draft.imageName || "item.jpg",
+        status: "pending",
+        stage: "image_uploaded",
+        storagePath: imagePath,
+        publicUrl,
+        metadata: { route: "/app/items/new" }
+      });
     }
 
     const created = await fetch("/api/items", {
@@ -107,9 +173,32 @@ export default function NewItemPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...draft, imagePath })
     });
-    if (!created.ok) throw new Error("Item save failed.");
+    if (!created.ok) {
+      await recordUploadTrust({
+        uploadId,
+        filename: draft.imageName || "item.jpg",
+        status: "failed",
+        stage: "item_create_failed",
+        storagePath: imagePath,
+        publicUrl,
+        errorMessage: "Item save failed.",
+        metadata: { route: "/app/items/new" }
+      });
+      throw new Error("Item save failed.");
+    }
     const payload = (await created.json()) as { item: WardrobeItem };
     upsertItem(payload.item);
+    rememberServerItemId(payload.item.id);
+    await recordUploadTrust({
+      uploadId,
+      filename: draft.imageName || payload.item.imageName || "item.jpg",
+      status: "saved",
+      stage: "item_saved",
+      itemId: payload.item.id,
+      storagePath: imagePath,
+      publicUrl,
+      metadata: { route: "/app/items/new" }
+    });
     router.push(`/app/items/${payload.item.id}`);
   }
 
@@ -118,10 +207,10 @@ export default function NewItemPage() {
       setAiMessage("Upload an image first.");
       return;
     }
-    await suggestTagsForImage(draft.imageData, false);
+    await suggestTagsForImage(draft.imageData, false, serverItemIdRef.current || undefined);
   }
 
-  async function suggestTagsForImage(imageData: string, automatic: boolean) {
+  async function suggestTagsForImage(imageData: string, automatic: boolean, syncItemId?: string) {
     const runId = taggingRunRef.current + 1;
     taggingRunRef.current = runId;
     setIsTagging(true);
@@ -141,10 +230,26 @@ export default function NewItemPage() {
         setAiMessage(payload.error?.message || "AI tagging is not available yet.");
         return;
       }
-      setDraft((current) => ({
-        ...current,
-        ...Object.fromEntries(Object.entries(payload.suggestions || {}).filter(([, value]) => value !== undefined))
-      }));
+      const suggestions = Object.fromEntries(Object.entries(payload.suggestions || {}).filter(([, value]) => value !== undefined));
+      const hasSuggestions = Object.keys(suggestions).length > 0;
+      let nextDraft: typeof draft | null = null;
+      if (hasSuggestions) {
+        setDraft((current) => {
+          nextDraft = { ...current, ...suggestions };
+          draftRef.current = nextDraft;
+          return nextDraft;
+        });
+      }
+      const itemId = syncItemId || serverItemIdRef.current;
+      if (itemId && nextDraft && hasSuggestions) {
+        try {
+          const item = await updateServerItem(itemId, nextDraft);
+          upsertItem(item);
+          setAutosaveMessage("AI tags saved to your closet.");
+        } catch (error) {
+          setAutosaveMessage(error instanceof Error ? `AI tag sync failed: ${error.message}` : "AI tag sync failed.");
+        }
+      }
       setAiMessage(automatic ? "AI tags applied automatically. Review before saving." : "AI suggestions applied. Review before saving.");
     } catch (err) {
       if (runId !== taggingRunRef.current) return;
@@ -152,6 +257,113 @@ export default function NewItemPage() {
     } finally {
       if (runId === taggingRunRef.current) setIsTagging(false);
     }
+  }
+
+  async function autosaveDraft(nextDraft: typeof draft, options?: { createIfMissing?: boolean; uploadId?: string }) {
+    if (!serverBacked) return null;
+    const persistedItemId = serverItemIdRef.current;
+    setAutosaveMessage(persistedItemId ? "Syncing item edits..." : "Autosaving to your closet...");
+    try {
+      const item = persistedItemId
+        ? await updateServerItem(persistedItemId, nextDraft)
+        : options?.createIfMissing
+          ? await createServerItem(nextDraft, options.uploadId)
+          : null;
+      if (!item) return null;
+      rememberServerItemId(item.id);
+      let syncedItem = item;
+      if (!persistedItemId && draftRef.current !== nextDraft) {
+        syncedItem = await updateServerItem(item.id, draftRef.current);
+      }
+      upsertItem(syncedItem);
+      setAutosaveMessage("Autosaved to your closet. You can close the app without losing this item.");
+      return syncedItem;
+    } catch (error) {
+      setAutosaveMessage(error instanceof Error ? `Autosave failed: ${error.message}` : "Autosave failed. Keep this page open and retry.");
+      return null;
+    }
+  }
+
+  function syncExistingServerDraft(nextDraft: typeof draft) {
+    if (!serverBacked || !serverItemIdRef.current) return;
+    void autosaveDraft(nextDraft);
+  }
+
+  function rememberServerItemId(itemId: string) {
+    serverItemIdRef.current = itemId;
+    setServerItemId(itemId);
+  }
+
+  async function createServerItem(nextDraft: typeof draft, uploadId = currentUploadId || createUploadId("single")) {
+    let imagePath: string | null = null;
+    let publicUrl: string | null = null;
+    if (nextDraft.imageData) {
+      const upload = await fetch("/api/upload/item-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageData: nextDraft.imageData, filename: nextDraft.imageName || "item.jpg" })
+      });
+      if (!upload.ok) throw new Error("Image upload failed.");
+      const uploadPayload = (await upload.json()) as { path: string; publicUrl?: string };
+      imagePath = uploadPayload.path;
+      publicUrl = uploadPayload.publicUrl || null;
+      await recordUploadTrust({
+        uploadId,
+        filename: nextDraft.imageName || "item.jpg",
+        status: "pending",
+        stage: "image_uploaded",
+        storagePath: imagePath,
+        publicUrl,
+        metadata: { route: "/app/items/new" }
+      });
+    }
+
+    const created = await fetch("/api/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...nextDraft, imagePath })
+    });
+    if (!created.ok) {
+      await recordUploadTrust({
+        uploadId,
+        filename: nextDraft.imageName || "item.jpg",
+        status: "failed",
+        stage: "item_create_failed",
+        storagePath: imagePath,
+        publicUrl,
+        errorMessage: "Item save failed.",
+        metadata: { route: "/app/items/new" }
+      });
+      throw new Error("Item save failed.");
+    }
+    const item = ((await created.json()) as { item: WardrobeItem }).item;
+    await recordUploadTrust({
+      uploadId,
+      filename: nextDraft.imageName || item.imageName || "item.jpg",
+      status: "saved",
+      stage: "item_saved",
+      itemId: item.id,
+      storagePath: imagePath,
+      publicUrl,
+      metadata: { route: "/app/items/new" }
+    });
+    return item;
+  }
+
+  async function updateServerItem(itemId: string, nextDraft: typeof draft) {
+    const updated = await fetch(`/api/items/${itemId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(nextDraft)
+    });
+    if (!updated.ok) throw new Error("Item update failed.");
+    return ((await updated.json()) as { item: WardrobeItem }).item;
+  }
+
+  function nameFromFilename(filename: string) {
+    const base = filename.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
+    if (!base) return "Uploaded item";
+    return base.replace(/\b\w/g, (character) => character.toUpperCase());
   }
 
   return (
@@ -202,6 +414,7 @@ export default function NewItemPage() {
           ) : null}
           {draft.imageName ? <Badge>{draft.imageName}</Badge> : null}
           {error ? <p className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</p> : null}
+          {autosaveMessage ? <p className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-sm text-muted-foreground">{autosaveMessage}</p> : null}
           {aiMessage ? <p className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-sm text-muted-foreground">{aiMessage}</p> : null}
           <p className="text-sm leading-6 text-muted-foreground">
             Tip: camera capture works best in the installed PWA. AI tagging starts automatically after upload when enabled.
@@ -352,7 +565,14 @@ export default function NewItemPage() {
             <Button onClick={submit} disabled={isSaving}>
               {isSaving ? "Saving..." : "Save item"}
             </Button>
-            <Button variant="secondary" onClick={() => setDraft(emptyDraft())}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                const next = emptyDraft();
+                setDraft(next);
+                draftRef.current = next;
+              }}
+            >
               Clear draft
             </Button>
           </div>

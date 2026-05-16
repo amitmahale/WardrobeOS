@@ -2,6 +2,7 @@
 
 import { OutfitCard } from "@/components/recommendations/outfit-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, Label, Select } from "@/components/ui/field";
@@ -75,14 +76,21 @@ export default function OutfitLabPage() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
-      <Card className="h-fit">
+      <Card className="h-fit overflow-hidden p-0">
+        <div className="bg-gradient-to-br from-brand/10 to-signal-blue/10 p-5">
+          <Badge variant="brand">Style</Badge>
+          <h2 className="mt-4 text-3xl font-black tracking-normal">Build an outfit for the moment.</h2>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            Context chips drive the same scoring engine without making the screen feel like a settings form.
+          </p>
+        </div>
         <CardHeader>
           <div>
             <CardTitle>Outfit query</CardTitle>
-            <CardDescription>Generate visual outfit cards from real closet images. Use GPT only when you want a try-on preview.</CardDescription>
+            <CardDescription>Generate visual outfit cards from real closet images.</CardDescription>
           </div>
         </CardHeader>
-        <div className="grid gap-4">
+        <div className="grid gap-4 p-5 pt-0">
           <Field>
             <Label>Occasion</Label>
             <Select value={query.occasion} onChange={(event) => patch({ occasion: event.target.value as Occasion })}>
@@ -148,16 +156,15 @@ export default function OutfitLabPage() {
 
       <section className="grid gap-4">
         {results.length ? (
-          <Card className="relative overflow-hidden">
-            <div className="absolute -right-16 -top-16 size-40 rounded-full bg-brand/10 blur-3xl" />
+          <Card className="relative overflow-hidden bg-white">
             <CardHeader className="relative">
               <div>
-                <CardTitle>Visual outfit board</CardTitle>
+                <CardTitle>Recommended outfits</CardTitle>
                 <CardDescription>
-                  Each recommendation is built from owned pieces. Use “Visualize in GPT” to copy the outfit prompt and open
-                  the WardrobeOS Stylist.
+                  Each recommendation is built from owned pieces. Save it, wear it, or send it to the try-on flow.
                 </CardDescription>
               </div>
+              <Badge variant="blue">{results.length} ideas</Badge>
             </CardHeader>
           </Card>
         ) : null}

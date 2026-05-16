@@ -9,7 +9,7 @@ type PlaceholderItem = {
 
 export function createPlaceholderImage(item: PlaceholderItem) {
   const fill = COLOR_HEX[item.primaryColor] || "#65748B";
-  const bg = "#11192A";
+  const bg = "#F3F1EC";
   let body = "";
 
   if (item.category === "bottom") {
@@ -37,15 +37,16 @@ export function createPlaceholderImage(item: PlaceholderItem) {
     <defs>
       <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
         <stop offset="0%" stop-color="${bg}"/>
-        <stop offset="100%" stop-color="#1A2740"/>
+        <stop offset="100%" stop-color="#DCE3EC"/>
       </linearGradient>
     </defs>
     <rect width="310" height="260" rx="26" fill="url(#bg)"/>
-    <circle cx="42" cy="42" r="20" fill="rgba(255,255,255,.05)"/>
-    <circle cx="270" cy="220" r="34" fill="rgba(255,255,255,.03)"/>
+    <circle cx="42" cy="42" r="20" fill="rgba(255,255,255,.55)"/>
+    <circle cx="270" cy="220" r="34" fill="rgba(255,255,255,.38)"/>
     ${body}
-    <text x="22" y="232" fill="rgba(244,247,251,.82)" font-size="14" font-family="Inter, Arial" font-weight="700">${escapeXml(item.name)}</text>
-    <text x="22" y="248" fill="rgba(168,179,199,.86)" font-size="11" font-family="Inter, Arial">${escapeXml(item.primaryColor)} · ${escapeXml(item.category)}</text>
+    <rect x="14" y="208" width="282" height="42" rx="16" fill="rgba(255,255,255,.82)"/>
+    <text x="26" y="232" fill="#171717" font-size="14" font-family="Inter, Arial" font-weight="800">${escapeXml(item.name)}</text>
+    <text x="26" y="248" fill="#6F6F6F" font-size="11" font-family="Inter, Arial">${escapeXml(item.primaryColor)} · ${escapeXml(item.category)}</text>
   </svg>`;
 
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;

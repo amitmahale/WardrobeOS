@@ -2,9 +2,9 @@ import { expect, test } from "@playwright/test";
 
 test("public landing and PWA manifest are available", async ({ page, request }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /wear more of what you own/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /open the app/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /architecture details/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /a calmer way to get dressed/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /open wardrobeos/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /see how it works/i })).toBeVisible();
 
   const manifest = await request.get("/manifest.webmanifest");
   expect(manifest.ok()).toBeTruthy();
@@ -22,6 +22,7 @@ test("protected app redirects anonymous users to magic-link login", async ({ pag
 
 test("login exposes an in-app email code fallback for PWA users", async ({ page }) => {
   await page.goto("/login");
+  await expect(page.getByTestId("login-page")).toHaveAttribute("data-hydrated", "true");
   await expect(page.getByLabel(/email code/i)).toBeVisible();
   await expect(page.getByRole("button", { name: /verify code in this app/i })).toBeEnabled();
   await expect(page.getByText(/password fallback/i)).toHaveCount(0);

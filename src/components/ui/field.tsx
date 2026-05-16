@@ -6,11 +6,11 @@ export function Field({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 }
 
 export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className={cn("text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground", className)} {...props} />;
+  return <label className={cn("text-xs font-black uppercase tracking-[0.12em] text-muted-foreground", className)} {...props} />;
 }
 
 export const inputClass =
-  "min-h-11 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-2 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-brand/50 focus:ring-2 focus:ring-brand/20";
+  "min-h-11 rounded-2xl border border-black/[0.10] bg-white px-4 py-2 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-brand/50 focus:ring-2 focus:ring-brand/15";
 
 export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(inputClass, className)} {...props} />;

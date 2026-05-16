@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BadgeCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,14 +24,21 @@ export default function PackPage() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
-      <Card className="h-fit">
+      <Card className="h-fit overflow-hidden p-0">
+        <div className="bg-gradient-to-br from-brand/10 to-signal-blue/10 p-5">
+          <Badge variant="brand">Plan</Badge>
+          <h2 className="mt-4 text-3xl font-black tracking-normal">Pack a smaller bag.</h2>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            Build a compact capsule from pieces you already own.
+          </p>
+        </div>
         <CardHeader>
           <div>
             <CardTitle>Trip capsule inputs</CardTitle>
             <CardDescription>Minimal packing with high outfit reuse.</CardDescription>
           </div>
         </CardHeader>
-        <div className="grid gap-4">
+        <div className="grid gap-4 p-5 pt-0">
           <Field>
             <Label>Trip length</Label>
             <Input
@@ -90,7 +98,6 @@ export default function PackPage() {
 
       <section className="grid gap-6">
         <Card className="relative overflow-hidden">
-          <div className="absolute -right-12 -top-12 size-40 rounded-full bg-signal-blue/10 blur-3xl" />
           <CardHeader>
             <div>
               <CardTitle>Recommended capsule</CardTitle>
@@ -102,7 +109,7 @@ export default function PackPage() {
             <div className="flex flex-wrap gap-2">
               {plan.items.map((item) => (
                 <Link key={item.id} href={`/app/items/${item.id}`}>
-                  <Badge variant="outline">{item.name}</Badge>
+              <Badge variant="outline">{item.name}</Badge>
                 </Link>
               ))}
             </div>
@@ -128,9 +135,16 @@ export default function PackPage() {
             </div>
           </CardHeader>
           <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
-            <p className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">Tops scale with trip length and laundry access.</p>
-            <p className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">Bottoms stay intentionally constrained to avoid overpacking.</p>
-            <p className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">Shoes never exceed the selected limit.</p>
+            {[
+              "Tops scale with trip length and laundry access.",
+              "Bottoms stay intentionally constrained to avoid overpacking.",
+              "Shoes never exceed the selected limit."
+            ].map((text) => (
+              <p key={text} className="rounded-2xl border border-black/[0.08] bg-[#f7f7f7] p-4">
+                <BadgeCheck className="mb-3 size-4 text-signal-blue" />
+                {text}
+              </p>
+            ))}
           </div>
         </Card>
       </section>

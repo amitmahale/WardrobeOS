@@ -55,6 +55,7 @@ type WardrobeState = {
   setPackQuery: (query: PackQuery) => void;
   setStyleProfile: (profile: StyleProfile) => void;
   resetDemo: () => void;
+  markServerSession: (userEmail: string | null) => void;
   hydrateRemote: (payload: { items: WardrobeItem[]; userEmail: string | null; closetId: string | null }) => void;
   upsertItem: (item: WardrobeItem) => void;
 };
@@ -161,6 +162,12 @@ export const useWardrobeStore = create<WardrobeState>()(
       setPackQuery: (query) => set({ packQuery: query, updatedAt: new Date().toISOString() }),
       setStyleProfile: (profile) => set({ styleProfile: profile, updatedAt: new Date().toISOString() }),
       resetDemo: () => set({ ...initialState(), hasHydrated: true }),
+      markServerSession: (userEmail) =>
+        set({
+          serverBacked: true,
+          userEmail,
+          updatedAt: new Date().toISOString()
+        }),
       hydrateRemote: (payload) =>
         set({
           items: payload.items,

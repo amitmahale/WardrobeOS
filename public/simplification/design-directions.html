@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WardrobeOS Design Directions</title>
+    <style>
+      :root {
+        --ink: #111111;
+        --muted: #6c6c6c;
+        --line: #e9e9e9;
+        --paper: #ffffff;
+        --soft: #f7f7f7;
+        --airbnb: #ff385c;
+        --hood: #00c805;
+        --apple: #0a84ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #f6f6f4;
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      main {
+        display: grid;
+        gap: 34px;
+        max-width: 1480px;
+        margin: 0 auto;
+        padding: 34px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 900px;
+        font-size: 52px;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 860px;
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.5;
+      }
+
+      .directions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .direction {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        background: white;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+      }
+
+      .direction-head {
+        min-height: 170px;
+        padding: 24px;
+      }
+
+      .label {
+        display: inline-flex;
+        align-items: center;
+        height: 28px;
+        border-radius: 999px;
+        padding: 0 12px;
+        color: white;
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .airbnb .label {
+        background: var(--airbnb);
+      }
+
+      .robinhood .label {
+        background: var(--hood);
+        color: #071707;
+      }
+
+      .apple .label {
+        background: var(--apple);
+      }
+
+      .direction h2 {
+        margin-top: 18px;
+        font-size: 31px;
+        letter-spacing: 0;
+      }
+
+      .direction p {
+        margin-top: 9px;
+        color: var(--muted);
+        line-height: 1.48;
+      }
+
+      .mock {
+        border-top: 1px solid var(--line);
+        padding: 20px;
+      }
+
+      .phone {
+        overflow: hidden;
+        border: 8px solid #111;
+        border-radius: 38px;
+        background: white;
+        min-height: 560px;
+      }
+
+      .phone-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 18px 10px;
+      }
+
+      .phone-title {
+        font-size: 24px;
+        font-weight: 850;
+      }
+
+      .pill {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 11px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .hero-card,
+      .small-card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        margin: 12px;
+        padding: 14px;
+      }
+
+      .image {
+        height: 180px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #f1eee8, #b8a47f);
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        border-radius: 999px;
+        padding: 0 16px;
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .airbnb .button.primary {
+        background: var(--airbnb);
+        color: white;
+      }
+
+      .airbnb .image {
+        background:
+          radial-gradient(circle at 55% 25%, rgba(255, 255, 255, 0.6), transparent 15%),
+          linear-gradient(135deg, #f5f1ea, #b8a47f);
+      }
+
+      .robinhood .phone {
+        background: #050505;
+        color: white;
+      }
+
+      .robinhood .hero-card,
+      .robinhood .small-card,
+      .robinhood .pill {
+        border-color: #232323;
+        background: #111;
+      }
+
+      .robinhood .muted,
+      .robinhood p,
+      .robinhood .pill {
+        color: #a6a6a6;
+      }
+
+      .robinhood .button.primary {
+        background: var(--hood);
+        color: #071707;
+      }
+
+      .robinhood .image {
+        height: 130px;
+        background:
+          linear-gradient(90deg, transparent 0 14%, rgba(0, 200, 5, 0.35) 14% 16%, transparent 16% 31%, rgba(0, 200, 5, 0.7) 31% 33%, transparent 33%),
+          linear-gradient(180deg, #111, #090909);
+      }
+
+      .chart-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 7px;
+        align-items: end;
+        height: 74px;
+        margin-top: 12px;
+      }
+
+      .bar {
+        border-radius: 999px 999px 4px 4px;
+        background: var(--hood);
+      }
+
+      .apple .phone {
+        background: #f2f2f7;
+      }
+
+      .apple .hero-card {
+        background: white;
+      }
+
+      .apple .button.primary {
+        background: var(--apple);
+        color: white;
+      }
+
+      .apple .image {
+        height: 160px;
+        background:
+          radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.65), transparent 15%),
+          linear-gradient(135deg, #d7e8ff, #8aa6cf);
+      }
+
+      .rings {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin: 12px;
+      }
+
+      .ring {
+        display: grid;
+        height: 92px;
+        place-items: center;
+        border-radius: 22px;
+        background: white;
+        font-weight: 850;
+      }
+
+      .ring span {
+        display: grid;
+        width: 54px;
+        height: 54px;
+        place-items: center;
+        border-radius: 999px;
+        border: 7px solid var(--apple);
+      }
+
+      .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin: 12px;
+      }
+
+      .small-card {
+        margin: 0;
+      }
+
+      .small-card strong {
+        display: block;
+        font-size: 18px;
+      }
+
+      .small-card span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .matrix {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: white;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 16px 18px;
+        vertical-align: top;
+      }
+
+      th {
+        background: #fbfbfb;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      td {
+        color: #363636;
+        line-height: 1.45;
+      }
+
+      .score {
+        display: inline-flex;
+        border-radius: 999px;
+        background: #f2f2f2;
+        padding: 5px 9px;
+        font-weight: 850;
+      }
+
+      .recommendation {
+        border: 1px solid #dfeee8;
+        border-radius: 30px;
+        background: #f6fffb;
+        padding: 26px;
+      }
+
+      .recommendation h2 {
+        font-size: 34px;
+      }
+
+      .recommendation p {
+        max-width: 980px;
+        margin-top: 10px;
+        color: #3c6456;
+        font-size: 17px;
+        line-height: 1.55;
+      }
+
+      @media (max-width: 980px) {
+        main {
+          padding: 18px;
+        }
+
+        h1 {
+          font-size: 38px;
+        }
+
+        .directions {
+          grid-template-columns: 1fr;
+        }
+
+        table {
+          min-width: 880px;
+        }
+
+        .matrix {
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Three viable design directions for WardrobeOS.</h1>
+        <p class="lead">
+          Robinhood is useful as a reference for speed and action clarity, but the final product should also respect that
+          wardrobes are visual, personal, and emotional. This compares Airbnb, Robinhood, and an Apple Health-style hybrid.
+        </p>
+      </header>
+
+      <section class="directions">
+        <article class="direction airbnb">
+          <div class="direction-head">
+            <span class="label">Airbnb style</span>
+            <h2>Browseable, warm, visual.</h2>
+            <p>Best for making clothes feel desirable and reducing the intimidation of a smart wardrobe tool.</p>
+          </div>
+          <div class="mock">
+            <div class="phone">
+              <div class="phone-top">
+                <div class="phone-title">Today</div>
+                <span class="pill">Closet</span>
+              </div>
+              <div class="hero-card">
+                <div class="image"></div>
+                <h3 style="margin: 14px 0 0">Navy shirt + chinos</h3>
+                <p>Work-ready, mild weather, revives an underused piece.</p>
+                <div class="button-row">
+                  <span class="button primary">Wore this</span>
+                  <span class="button pill">Try-on</span>
+                </div>
+              </div>
+              <div class="mini-grid">
+                <div class="small-card"><strong>24</strong><span>ready outfits</span></div>
+                <div class="small-card"><strong>6</strong><span>revive pieces</span></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="direction robinhood">
+          <div class="direction-head">
+            <span class="label">Robinhood style</span>
+            <h2>Fast, numeric, decisive.</h2>
+            <p>Best for making the recommendation engine feel sharp, modern, and instantly actionable.</p>
+          </div>
+          <div class="mock">
+            <div class="phone">
+              <div class="phone-top">
+                <div class="phone-title">Wardrobe</div>
+                <span class="pill">Today</span>
+              </div>
+              <div class="hero-card">
+                <span class="pill">Closet value</span>
+                <h3 style="margin: 12px 0 0; font-size: 34px">24 outfits</h3>
+                <p class="muted">+6 unlocked if you add cream trousers</p>
+                <div class="image"></div>
+                <div class="chart-row">
+                  <div class="bar" style="height: 38%"></div>
+                  <div class="bar" style="height: 62%"></div>
+                  <div class="bar" style="height: 48%"></div>
+                  <div class="bar" style="height: 86%"></div>
+                </div>
+                <div class="button-row">
+                  <span class="button primary">Generate</span>
+                  <span class="button pill">Buy next</span>
+                </div>
+              </div>
+              <div class="mini-grid">
+                <div class="small-card"><strong>92</strong><span>fit score</span></div>
+                <div class="small-card"><strong>3</strong><span>actions</span></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="direction apple">
+          <div class="direction-head">
+            <span class="label">Apple Health hybrid</span>
+            <h2>Daily companion, calm metrics.</h2>
+            <p>Best fit if the product centers on habits: wear rotation, smarter shopping, packing, and outfit confidence.</p>
+          </div>
+          <div class="mock">
+            <div class="phone">
+              <div class="phone-top">
+                <div class="phone-title">Summary</div>
+                <span class="pill">May 16</span>
+              </div>
+              <div class="rings">
+                <div class="ring"><span>82</span></div>
+                <div class="ring"><span>24</span></div>
+                <div class="ring"><span>6</span></div>
+              </div>
+              <div class="hero-card">
+                <div class="image"></div>
+                <h3 style="margin: 14px 0 0">Get dressed for work</h3>
+                <p>Balanced color, strong formality fit, uses a lower-wear item.</p>
+                <div class="button-row">
+                  <span class="button primary">Start</span>
+                  <span class="button pill">Details</span>
+                </div>
+              </div>
+              <div class="mini-grid">
+                <div class="small-card"><strong>Buy less</strong><span>one purchase worth it</span></div>
+                <div class="small-card"><strong>Pack</strong><span>trip capsule ready</span></div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="matrix">
+        <table>
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th>Airbnb style</th>
+              <th>Robinhood style</th>
+              <th>Apple Health hybrid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Clothing imagery</strong></td>
+              <td><span class="score">9/10</span> Cards and photography are natural here.</td>
+              <td><span class="score">5/10</span> Finance-style charts can fight the visual closet experience.</td>
+              <td><span class="score">7/10</span> Works if images support daily cards rather than dominate.</td>
+            </tr>
+            <tr>
+              <td><strong>Decision clarity</strong></td>
+              <td><span class="score">7/10</span> Friendly, but can become browse-heavy.</td>
+              <td><span class="score">9/10</span> Very strong for “do this now” actions.</td>
+              <td><span class="score">9/10</span> Strong daily summary plus progressive detail.</td>
+            </tr>
+            <tr>
+              <td><strong>Professional feel</strong></td>
+              <td><span class="score">8/10</span> Premium consumer look.</td>
+              <td><span class="score">7/10</span> Sharp but risks feeling gamified.</td>
+              <td><span class="score">9/10</span> Calm, durable, and trustworthy.</td>
+            </tr>
+            <tr>
+              <td><strong>Fit for WardrobeOS</strong></td>
+              <td><span class="score">8/10</span> Great for closet and homepage.</td>
+              <td><span class="score">6/10</span> Great for Buy Next and scoring, weaker for style exploration.</td>
+              <td><span class="score">9/10</span> Best overall because WardrobeOS is a daily decision and habit system.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="recommendation">
+        <h2>Recommendation: Apple Health structure, Airbnb surface, Robinhood moments.</h2>
+        <p>
+          Use Apple Health as the product model: a calm daily summary with useful rings, cards, and trends. Use Airbnb for
+          the visual closet cards and homepage warmth. Use Robinhood only inside high-conviction decision panels like fit
+          score, buy-next unlocks, and “what changed if I add this?” This avoids making the whole app feel like trading,
+          while preserving Robinhood’s best quality: fast action clarity.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

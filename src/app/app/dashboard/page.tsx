@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Heart, ShoppingBag, Sparkles } from "lucide-react";
 import { CoverageBars } from "@/components/coverage-bars";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,65 @@ export default function DashboardPage() {
 
   return (
     <div className="grid gap-6">
+      <section className="grid gap-6 xl:grid-cols-[1fr_360px]">
+        <Card className="relative overflow-hidden bg-white p-6 md:p-8">
+          <div className="absolute right-0 top-0 h-full w-1/2 bg-gradient-to-br from-brand/10 via-transparent to-signal-blue/10" />
+          <div className="relative grid gap-6 lg:grid-cols-[1fr_300px] lg:items-center">
+            <div>
+              <Badge variant="brand">Today</Badge>
+              <h2 className="mt-5 max-w-2xl text-4xl font-black tracking-normal md:text-5xl">
+                Get dressed with less thinking.
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">
+                Start with a strong outfit, log what you wore, or review the one purchase that changes the most.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button asChild>
+                  <Link href="/app/outfits">
+                    <Sparkles className="mr-2 size-4" />
+                    Generate outfit
+                  </Link>
+                </Button>
+                <Button asChild variant="secondary">
+                  <Link href="/app/buy-next">
+                    <ShoppingBag className="mr-2 size-4" />
+                    Best purchase
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            <div className="rounded-[1.75rem] border border-black/[0.08] bg-[#f2f2f7] p-4">
+              <div className="grid grid-cols-3 gap-3">
+                <DailyRing label="Coverage" value={82} />
+                <DailyRing label="Outfits" value={stats.readyOutfitCount} />
+                <DailyRing label="Revive" value={stats.underusedCount} />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <Badge variant="outline">Next best action</Badge>
+              <h3 className="mt-4 text-2xl font-black">{topPurchase?.name || "Build closet coverage"}</h3>
+            </div>
+            <Heart className="size-5 text-brand" />
+          </div>
+          <p className="mt-4 text-sm leading-6 text-muted-foreground">
+            {topPurchase
+              ? `${topPurchase.unlockCount} new outfits unlocked. ${topPurchase.reason}`
+              : "Add more active tops, bottoms, and shoes to unlock stronger guidance."}
+          </p>
+          <Button asChild variant="secondary" className="mt-5">
+            <Link href="/app/buy-next">
+              Review plan
+              <ArrowRight className="ml-2 size-4" />
+            </Link>
+          </Button>
+        </Card>
+      </section>
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Active items" value={stats.activeCount} support={`Across ${stats.categoryCount} category groups`} />
         <StatCard label="High-confidence outfits" value={stats.readyOutfitCount} support="Using current scoring rules" />
@@ -48,16 +107,15 @@ export default function DashboardPage() {
 
       <section className="grid gap-6 xl:grid-cols-[1fr_0.9fr]">
         <Card className="relative overflow-hidden">
-          <div className="absolute -left-16 -top-16 size-44 rounded-full bg-brand/10 blur-3xl" />
           <CardHeader>
             <div>
-              <CardTitle>Quick wear tracking</CardTitle>
-              <CardDescription>Tap what you wore today. Counts update immediately and improve rotation scoring.</CardDescription>
+              <CardTitle>Log today&apos;s outfit</CardTitle>
+              <CardDescription>Tap what you wore. Rotation scores improve automatically.</CardDescription>
             </div>
             <Badge variant="brand">{todaysWearCount} today</Badge>
           </CardHeader>
           <div className="relative grid gap-4">
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-2 sm:grid-cols-2">
               {quickWear.map((item) => (
                 <Button
                   key={item.id}
@@ -85,7 +143,7 @@ export default function DashboardPage() {
                 {wearActivity.map((day) => (
                   <div key={day.key} className="grid gap-1">
                     <div
-                      className="rounded-full bg-brand/80 transition-all"
+                      className="rounded-full bg-signal-blue transition-all"
                       title={`${day.label}: ${day.count} items worn`}
                       style={{ height: `${Math.max(8, Math.min(48, 8 + day.count * 8))}px`, opacity: day.count ? 0.95 : 0.2 }}
                     />
@@ -109,7 +167,7 @@ export default function DashboardPage() {
           <div className="grid gap-3" data-testid="recent-wear-log">
             {recentWear.length ? (
               recentWear.map((entry) => (
-                <div key={entry.id} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                <div key={entry.id} className="rounded-2xl border border-black/[0.08] bg-[#f7f7f7] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-medium">{entry.label}</p>
@@ -122,7 +180,7 @@ export default function DashboardPage() {
                 </div>
               ))
             ) : (
-              <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.025] p-4 text-sm text-muted-foreground">
+              <p className="rounded-2xl border border-dashed border-black/[0.12] bg-[#f7f7f7] p-4 text-sm text-muted-foreground">
                 No wear events logged yet. Use the quick buttons to start rotation tracking.
               </p>
             )}
@@ -174,16 +232,16 @@ export default function DashboardPage() {
               <CardDescription>These pieces are candidates for future outfit prompts.</CardDescription>
             </div>
           </CardHeader>
-          <div className="overflow-hidden rounded-2xl border border-white/10">
+          <div className="overflow-hidden rounded-2xl border border-black/[0.08]">
             <table className="w-full text-left text-sm">
-              <thead className="bg-white/[0.04] text-muted-foreground">
+              <thead className="bg-[#f7f7f7] text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 font-medium">Item</th>
                   <th className="px-4 py-3 font-medium">Wears</th>
                   <th className="px-4 py-3 font-medium">Likely contexts</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody className="divide-y divide-black/[0.08]">
                 {underused.map((item) => (
                   <tr key={item.id}>
                     <td className="px-4 py-3">{item.name}</td>
@@ -210,7 +268,7 @@ export default function DashboardPage() {
               <Link
                 key={item.id}
                 href={`/app/items/${item.id}`}
-                className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.055]"
+                className="flex items-center justify-between gap-4 rounded-2xl border border-black/[0.08] bg-[#f7f7f7] p-4 transition hover:border-black/20"
               >
                 <span>
                   <span className="block font-medium">{item.name}</span>
@@ -224,6 +282,17 @@ export default function DashboardPage() {
           </div>
         </Card>
       </section>
+    </div>
+  );
+}
+
+function DailyRing({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-[1.25rem] bg-white p-3 text-center shadow-soft">
+      <div className="mx-auto grid size-16 place-items-center rounded-full border-[7px] border-signal-blue text-lg font-black">
+        {value}
+      </div>
+      <div className="mt-2 text-xs font-bold text-muted-foreground">{label}</div>
     </div>
   );
 }

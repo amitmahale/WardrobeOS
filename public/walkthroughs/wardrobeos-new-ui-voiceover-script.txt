@@ -1,0 +1,25 @@
+1. [7s] WardrobeOS now opens with a calmer, cleaner homepage. The product is organized around real wardrobe decisions instead of a technical dashboard.
+
+2. [8s] I sign in with a fresh dummy account, using the same email code flow a beta user would see.
+
+3. [7s] The Today screen starts with one recommendation, one reason, and the next best action. The health rings make the closet status easy to scan.
+
+4. [10s] Next I add a single item. The image uploads, the item autosaves to the server, and metadata can be reviewed before saving.
+
+5. [9s] Bulk upload still works for multiple items. The workflow keeps the review step, but the lighter design makes it easier to follow.
+
+6. [8s] Closet is now a cleaner catalog. Search and the most useful filters are up front, with advanced filters tucked away until needed.
+
+7. [9s] Style keeps the outfit engine, scores, save actions, wear tracking, and GPT try-on handoff, but presents them as visual outfit cards.
+
+8. [9s] Plan uses Robinhood-style decision clarity only where it helps: this buy-next card shows unlocks, confidence, gaps, and owned pieces it pairs with.
+
+9. [7s] The packing planner is still here. It builds a compact trip capsule from owned pieces while respecting weather, laundry, and shoe limits.
+
+10. [7s] Insights keeps the deeper analysis: occasion coverage, duplicates, and underused items.
+
+11. [8s] GPT Stylist remains available for closet-aware prompts and visual try-on workflows, now as an advanced styling tool.
+
+12. [7s] Reliability still protects the upload workflow with diagnostics and recovery actions.
+
+13. [7s] Back on Today, the cleaned up app feels more like a daily wardrobe companion while preserving the full feature set.

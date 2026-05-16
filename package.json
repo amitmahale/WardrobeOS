@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "supabase:check": "node scripts/check-supabase.mjs",
     "export:architecture-pdf": "node scripts/export-architecture-pdf.mjs",
     "test": "vitest run",
     "test:watch": "vitest",

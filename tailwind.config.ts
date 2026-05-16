@@ -30,13 +30,14 @@ const config: Config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         brand: {
-          DEFAULT: "#B7FF6A",
-          deep: "#8BDD39"
+          DEFAULT: "#FF385C",
+          deep: "#E21D48"
         },
         signal: {
-          blue: "#6EA8FE",
-          amber: "#F8C15C",
-          rose: "#F4849A"
+          blue: "#0A84FF",
+          amber: "#B26A00",
+          rose: "#FF385C",
+          green: "#00C805"
         }
       },
       borderRadius: {
@@ -45,7 +46,8 @@ const config: Config = {
         md: "0.875rem"
       },
       boxShadow: {
-        glow: "0 18px 70px rgba(0, 0, 0, 0.38)"
+        glow: "0 18px 70px rgba(0, 0, 0, 0.10)",
+        soft: "0 18px 48px rgba(17, 17, 17, 0.06)"
       },
       fontFamily: {
         sans: ["var(--font-sans)", "Inter", "ui-sans-serif", "system-ui"]

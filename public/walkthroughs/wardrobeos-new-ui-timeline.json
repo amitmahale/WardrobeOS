@@ -1,0 +1,67 @@
+[
+  {
+    "key": "home",
+    "seconds": 7,
+    "text": "WardrobeOS now opens with a calmer, cleaner homepage. The product is organized around real wardrobe decisions instead of a technical dashboard."
+  },
+  {
+    "key": "login",
+    "seconds": 8,
+    "text": "I sign in with a fresh dummy account, using the same email code flow a beta user would see."
+  },
+  {
+    "key": "today",
+    "seconds": 7,
+    "text": "The Today screen starts with one recommendation, one reason, and the next best action. The health rings make the closet status easy to scan."
+  },
+  {
+    "key": "add-single",
+    "seconds": 10,
+    "text": "Next I add a single item. The image uploads, the item autosaves to the server, and metadata can be reviewed before saving."
+  },
+  {
+    "key": "bulk",
+    "seconds": 9,
+    "text": "Bulk upload still works for multiple items. The workflow keeps the review step, but the lighter design makes it easier to follow."
+  },
+  {
+    "key": "closet",
+    "seconds": 8,
+    "text": "Closet is now a cleaner catalog. Search and the most useful filters are up front, with advanced filters tucked away until needed."
+  },
+  {
+    "key": "style",
+    "seconds": 9,
+    "text": "Style keeps the outfit engine, scores, save actions, wear tracking, and GPT try-on handoff, but presents them as visual outfit cards."
+  },
+  {
+    "key": "plan",
+    "seconds": 9,
+    "text": "Plan uses Robinhood-style decision clarity only where it helps: this buy-next card shows unlocks, confidence, gaps, and owned pieces it pairs with."
+  },
+  {
+    "key": "pack",
+    "seconds": 7,
+    "text": "The packing planner is still here. It builds a compact trip capsule from owned pieces while respecting weather, laundry, and shoe limits."
+  },
+  {
+    "key": "insights",
+    "seconds": 7,
+    "text": "Insights keeps the deeper analysis: occasion coverage, duplicates, and underused items."
+  },
+  {
+    "key": "gpt",
+    "seconds": 8,
+    "text": "GPT Stylist remains available for closet-aware prompts and visual try-on workflows, now as an advanced styling tool."
+  },
+  {
+    "key": "reliability",
+    "seconds": 7,
+    "text": "Reliability still protects the upload workflow with diagnostics and recovery actions."
+  },
+  {
+    "key": "finish",
+    "seconds": 7,
+    "text": "Back on Today, the cleaned up app feels more like a daily wardrobe companion while preserving the full feature set."
+  }
+]

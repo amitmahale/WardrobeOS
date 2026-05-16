@@ -46,15 +46,15 @@ export function OutfitCard({
           {recommendation.items.map((item, index) => (
             <div
               key={item.id}
-              className={`relative overflow-hidden rounded-3xl border border-white/10 bg-[#11192a] ${
+              className={`relative overflow-hidden rounded-3xl border border-black/[0.08] bg-gradient-to-br from-[#f3f1ec] to-[#dce3ec] ${
                 recommendation.items.length === 3 && index === 0 ? "row-span-2" : ""
               }`}
             >
               {item.imageData ? (
                 <Image src={item.imageData} alt={item.name} fill sizes="220px" className="object-cover" unoptimized />
               ) : null}
-              <div className="absolute inset-x-2 bottom-2 rounded-2xl border border-white/10 bg-[#08101f]/78 p-2 backdrop-blur">
-                <span className="block truncate text-xs font-medium">{item.name}</span>
+              <div className="absolute inset-x-2 bottom-2 rounded-2xl border border-black/[0.08] bg-white/90 p-2 shadow-soft backdrop-blur">
+                <span className="block truncate text-xs font-black">{item.name}</span>
                 <span className="mt-0.5 block text-[11px] text-muted-foreground">
                   {labelize(item.primaryColor)} {labelize(item.category)}
                 </span>
@@ -77,7 +77,7 @@ export function OutfitCard({
               <Badge variant="outline">{recommendation.items.length} pieces</Badge>
               <Badge variant={recommendation.score >= 85 ? "brand" : "blue"}>{recommendation.score} score</Badge>
             </div>
-            <h3 className="text-2xl font-semibold tracking-tight">{recommendation.items.map((item) => item.name).join(" + ")}</h3>
+            <h3 className="text-2xl font-black tracking-normal">{recommendation.items.map((item) => item.name).join(" + ")}</h3>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">{recommendation.rationale}</p>
           </div>
         </div>
@@ -90,7 +90,7 @@ export function OutfitCard({
           ))}
         </div>
 
-        <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:grid-cols-2">
+        <div className="grid gap-3 rounded-3xl border border-black/[0.08] bg-[#f7f7f7] p-4 sm:grid-cols-2">
           <MiniScore label="Occasion fit" value={recommendation.scoreBreakdown.occasion} />
           <MiniScore label="Formality" value={recommendation.scoreBreakdown.formality} />
         </div>
@@ -128,9 +128,9 @@ export function OutfitCard({
 
 function MiniScore({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+    <div className="rounded-2xl border border-black/[0.08] bg-white p-3">
       <span className="text-xs text-muted-foreground">{label}</span>
-      <strong className="mt-1 block text-lg">{value}</strong>
+      <strong className="mt-1 block text-lg font-black">{value}</strong>
     </div>
   );
 }

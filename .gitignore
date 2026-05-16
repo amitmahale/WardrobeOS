@@ -8,9 +8,11 @@
 .admin-auth-*
 .gpt-action-oauth*
 .vercel
+supabase/.temp
 .next
 node_modules
 coverage
+artifacts/
 dist
 playwright-report
 test-results
