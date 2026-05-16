@@ -23,11 +23,13 @@ export default function LoginPage() {
   const [token, setToken] = useState("");
   const [authError, setAuthError] = useState("");
   const [nextPath, setNextPath] = useState("/app/dashboard");
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setAuthError(params.get("auth_error") || "");
     setNextPath(safeNextPath(params.get("next")));
+    setIsHydrated(true);
   }, []);
 
   async function sendCode(event: FormEvent<HTMLFormElement>) {
@@ -91,7 +93,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center px-5">
+    <main className="grid min-h-screen place-items-center px-5" data-testid="login-page" data-hydrated={isHydrated}>
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="mb-4 grid size-12 place-items-center rounded-2xl border border-brand/25 bg-brand/10 text-brand">

@@ -229,6 +229,72 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["recommendation_feedback"]["Insert"]>;
         Relationships: [];
       };
+      app_events: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          closet_id: string | null;
+          event_type: string;
+          severity: "info" | "warning" | "error";
+          route: string | null;
+          item_id: string | null;
+          upload_id: string | null;
+          message: string | null;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          closet_id?: string | null;
+          event_type: string;
+          severity?: "info" | "warning" | "error";
+          route?: string | null;
+          item_id?: string | null;
+          upload_id?: string | null;
+          message?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["app_events"]["Insert"]>;
+        Relationships: [];
+      };
+      upload_recovery_entries: {
+        Row: {
+          id: string;
+          user_id: string;
+          closet_id: string;
+          item_id: string | null;
+          upload_id: string;
+          filename: string;
+          storage_path: string | null;
+          public_url: string | null;
+          status: "pending" | "saved" | "failed" | "recovered" | "ignored";
+          stage: string;
+          error_message: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          closet_id: string;
+          item_id?: string | null;
+          upload_id: string;
+          filename: string;
+          storage_path?: string | null;
+          public_url?: string | null;
+          status?: "pending" | "saved" | "failed" | "recovered" | "ignored";
+          stage?: string;
+          error_message?: string | null;
+          metadata?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["upload_recovery_entries"]["Insert"]>;
+        Relationships: [];
+      };
       purchase_candidate_library: {
         Row: {
           key: string;

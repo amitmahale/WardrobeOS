@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { PurchaseCard } from "@/components/recommendations/purchase-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Label, Select } from "@/components/ui/field";
@@ -31,14 +32,21 @@ export default function BuyNextPage() {
   return (
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
       <section className="grid h-fit gap-6">
-        <Card>
+        <Card className="overflow-hidden p-0">
+          <div className="bg-gradient-to-br from-brand/10 to-signal-blue/10 p-5">
+            <Badge variant="brand">Plan</Badge>
+            <h2 className="mt-4 text-3xl font-black tracking-normal">Buy less, unlock more.</h2>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              Use Robinhood-style decision clarity only where it helps: what changes if this item enters the closet?
+            </p>
+          </div>
           <CardHeader>
             <div>
               <CardTitle>Purchase simulation</CardTitle>
               <CardDescription>Ranks candidates by net new high-confidence outfits.</CardDescription>
             </div>
           </CardHeader>
-          <div className="grid gap-4">
+          <div className="grid gap-4 p-5 pt-0">
             <Field>
               <Label>Budget tier</Label>
               <Select value={query.budgetTier} onChange={(event) => patch({ budgetTier: event.target.value as BudgetTier })}>
@@ -100,11 +108,10 @@ export default function BuyNextPage() {
         </Card>
 
         <Card className="relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 size-28 rounded-full bg-brand/10 blur-2xl" />
           <CardTitle className="relative">Current unlock leader</CardTitle>
           {top ? (
             <div className="relative mt-4">
-              <div className="text-3xl font-semibold">{top.unlockCount}</div>
+              <div className="text-4xl font-black">{top.unlockCount}</div>
               <p className="mt-1 text-sm text-muted-foreground">new outfits from {top.name}</p>
             </div>
           ) : (
@@ -122,8 +129,8 @@ export default function BuyNextPage() {
           <div className="grid gap-3">
             {gaps.length ? (
               gaps.map((gap) => (
-                <div key={gap.key} className="grid grid-cols-[72px_1fr] gap-3 rounded-3xl border border-white/10 bg-white/[0.03] p-3">
-                  <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#11192a]">
+                <div key={gap.key} className="grid grid-cols-[72px_1fr] gap-3 rounded-3xl border border-black/[0.08] bg-[#f7f7f7] p-3">
+                  <div className="relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-[#f3f1ec] to-[#dce3ec]">
                     <Image
                       src={createPlaceholderImage(gap.visual)}
                       alt={gap.label}
@@ -135,17 +142,15 @@ export default function BuyNextPage() {
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <strong className="text-sm">{gap.label}</strong>
-                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-muted-foreground">
-                        {labelize(gap.severity)}
-                      </span>
+                      <strong className="text-sm font-black">{gap.label}</strong>
+                      <Badge>{labelize(gap.severity)}</Badge>
                     </div>
                     <p className="mt-1 text-xs leading-5 text-muted-foreground">{gap.reason}</p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-sm text-muted-foreground">
+              <p className="rounded-2xl border border-black/[0.08] bg-[#f7f7f7] p-4 text-sm text-muted-foreground">
                 No obvious catalog gaps. Buy Next will focus on high-scoring outfit multipliers.
               </p>
             )}
@@ -155,14 +160,14 @@ export default function BuyNextPage() {
 
       <section className="grid gap-4">
         <Card className="relative overflow-hidden">
-          <div className="absolute -right-16 -top-16 size-40 rounded-full bg-signal-blue/10 blur-3xl" />
           <CardHeader className="relative">
             <div>
-              <CardTitle>Gap-based recommendations</CardTitle>
+              <CardTitle>Recommendations</CardTitle>
               <CardDescription>
                 Each card shows the candidate image, the gap it fills, and the owned pieces it can unlock.
               </CardDescription>
             </div>
+            <Badge variant="blue">{recommendations.length} candidates</Badge>
           </CardHeader>
         </Card>
         {recommendations.length ? (
